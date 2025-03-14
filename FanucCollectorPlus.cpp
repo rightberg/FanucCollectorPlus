@@ -208,7 +208,7 @@ struct AxesData
             {"current_load", data.current_load},
             {"current_load_percent", data.current_load_percent},
             {"servo_loads", data.servo_loads},
-            {"axes_err", data.servo_loads}
+            {"axes_err", data.axes_err}
         };
     }
 };
