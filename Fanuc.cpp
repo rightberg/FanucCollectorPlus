@@ -902,7 +902,6 @@ float_data GetServoCurrentLoad(unsigned short handle)
             }
             else
             {
-
                 long prm = n.u.rdata.prm_val;
                 long dec = n.u.rdata.dec_val;
 
