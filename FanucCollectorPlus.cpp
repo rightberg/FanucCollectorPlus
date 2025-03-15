@@ -63,21 +63,22 @@ struct ModeData
         load_excess = _load_excess.data;
 
         if (_mode.error)
-            mode_err += " MODE ERR: " + _mode.error_msg;
+            mode_err += "MODE ERR (" + _mode.error_msg + ");";
         if (_run_state.error)
-            mode_err += " RUN STATE ERR: " + _run_state.error_msg;
+            mode_err += "RUN STATE ERR (" + _run_state.error_msg + ");";
         if (_status.error)
-            mode_err += " STATUS ERR: " + _status.error_msg;
+            mode_err += "STATUS ERR (" + _status.error_msg + ");";
         if (_shutdowns.error)
-            mode_err += " SHUTDOWNS ERR: " + _shutdowns.error_msg;
+            mode_err += "SHUTDOWNS ERR (" + _shutdowns.error_msg + ");";
         if (_hight_speed.error)
-            mode_err += " HIGHT SPEED ERR: " + _hight_speed.error_msg;
+            mode_err += "HIGHT SPEED ERR (" + _hight_speed.error_msg + ");";
         if (_axis_motion.error)
-            mode_err += " AXIS MOTION ERR: " + _axis_motion.error_msg;
+            mode_err += "AXIS MOTION ERR (" + _axis_motion.error_msg + ");";
         if (_mstb.error)
-            mode_err += " MSTB ERR: " + _mstb.error_msg;
+            mode_err += "MSTB ERR (" + _mstb.error_msg + ");";
         if (_load_excess.error)
-            mode_err += " LOAD EXCESS ERR: " + _load_excess.error_msg;
+            mode_err += "LOAD EXCESS ERR (" + _load_excess.error_msg + ");";
+
     }
 
     static friend void to_json(nlohmann::json& j, const ModeData& data)
@@ -124,17 +125,17 @@ struct ProgramData
         frame_number = _frame_number.data;
 
         if (_frame.error)
-            prg_err += " FRAME ERR: " + _frame.error_msg;
+            prg_err += "FRAME ERR (" + _frame.error_msg + ");";
         if (_main_prog_number.error)
-            prg_err += " MAIN PRG NUM ERR: " + _main_prog_number.error_msg;
+            prg_err += "MAIN PRG NUM ERR (" + _main_prog_number.error_msg + ");";
         if (_sub_prog_number.error)
-            prg_err += " SUB PRG NUM ERR: " + _sub_prog_number.error_msg;
+            prg_err += "SUB PRG NUM ERR (" + _sub_prog_number.error_msg + ");";
         if (_parts_count.error)
-            prg_err += " PARTS COUNT ERR: " + _parts_count.error_msg;
+            prg_err += "PARTS COUNT ERR (" + _parts_count.error_msg + ");";
         if (_tool_number.error)
-            prg_err += " TOOL NUMBER ERR: " + _tool_number.error_msg;
+            prg_err += "TOOL NUMBER ERR (" + _tool_number.error_msg + ");";
         if (_frame_number.error)
-            prg_err += " FRAME NUMBER ERR: " + _frame_number.error_msg;
+            prg_err += "FRAME NUMBER ERR (" + _frame_number.error_msg + ");";
     }
 
     static friend void to_json(nlohmann::json& j, const ProgramData& data)
@@ -182,19 +183,19 @@ struct AxesData
         servo_loads = _servo_loads.data;
 
         if (_feedrate.error)
-            axes_err += " FEEDRATE ERR: " + _feedrate.error_msg;
+            axes_err += "FEEDRATE ERR (" + _feedrate.error_msg + ");";
         if (_feed_override.error)
-            axes_err += " FOV ERR: " + _feed_override.error_msg;
+            axes_err += "FOV ERR (" + _feed_override.error_msg + ");";
         if (_jog_override.error)
-            axes_err += " JOV ERR: " + _jog_override.error_msg;
+            axes_err += "JOV ERR (" + _jog_override.error_msg + ");";
         if (_jog_speed.error)
-            axes_err += " JOG SPEED ERR: " + _jog_speed.error_msg;
+            axes_err += "JOG SPEED ERR (" + _jog_speed.error_msg + ");";
         if (_current_load.error)
-            axes_err += " CURRENT LOAD ERR: " + _current_load.error_msg;
+            axes_err += "CURRENT LOAD ERR (" + _current_load.error_msg + ");";
         if (_current_load_percent.error)
-            axes_err += " CURRENT LOAD % ERR: " + _current_load_percent.error_msg;
+            axes_err += "CURRENT LOAD % ERR (" + _current_load_percent.error_msg + ");";
         if (_servo_loads.error)
-            axes_err += " SERVO LOAD ERR: " + _servo_loads.error_msg;
+            axes_err += "SERVO LOAD ERR (" + _servo_loads.error_msg + ");";
     }
 
     static friend void to_json(nlohmann::json& j, const AxesData& data)
@@ -279,7 +280,6 @@ int main(int argc, char* argv[])
             if(!handle.error)
                 FreeHandle(handle.data);
         }
-
         nlohmann::json output_json = col_data;
         std::cout << output_json.dump() << std::endl;
     }
