@@ -815,10 +815,10 @@ int_data GetJogSpeed(unsigned short handle)
     }
     else
     {
-        ODBAXDT buf = {};
+        ODBAXDT buf[MAX_AXIS];
         short lenght = MAX_AXIS;
         short type = 5;
-        short ret = cnc_rdaxisdata(handle, 5, &type, 5, &lenght, &buf);
+        short ret = cnc_rdaxisdata(handle, 5, &type, 5, &lenght, buf);
         if (ret != EW_OK)
         {
             res.error = true;
@@ -826,14 +826,18 @@ int_data GetJogSpeed(unsigned short handle)
         }
         else
         {
-            bool jog_enabled = (buf.flag & 0x02) != 0;
-            if (!jog_enabled)
+            bool jog_enabled = false;
+            for (int i = type * MAX_AXIS; i < type * MAX_AXIS + lenght; i++) 
             {
-                res.error = true;
-                res.error_msg = "Jog отключен";
+                jog_enabled = (buf[i].flag & 0x02) != 0;
+                if (jog_enabled)
+                {
+                    res.data = buf[i].data;
+                    return res;
+                }
             }
-            else
-                res.data = buf.data;
+            res.error = true;
+            res.error_msg = "Jog отключен";
         }
     }
     return res;

@@ -13,17 +13,26 @@
 
 struct Device
 {
+    std::string name;
     std::string address;
     std::string series;
     int port;
 
     friend void to_json(nlohmann::json& j, const Device& d)
     {
-        j = nlohmann::json{ {"address", d.address}, {"port", d.port}, {"series", d.series} };
+        j = nlohmann::json
+        { 
+            {"name", d.name}, 
+            {"address", d.address }, 
+            {"port", d.port}, 
+            {"series", d.series}
+        };
     }
 
     static friend void from_json(const nlohmann::json& j, Device& d)
     {
+        
+        j.at("name").get_to(d.name);
         j.at("address").get_to(d.address);
         j.at("port").get_to(d.port);
         j.at("series").get_to(d.series);
@@ -242,17 +251,15 @@ struct Collector
 
 class CollectorData
 {
-public: std::vector<Collector> collectors;
-
-      void AddCollector(unsigned short handle, Device device)
-      {
-          collectors.emplace_back(handle, device);
-      }
-
-      static friend void to_json(nlohmann::json& j, const CollectorData& collector_data)
-      {
-          j = nlohmann::json{ {"collectors", collector_data.collectors} };
-      }
+    public: std::vector<Collector> collectors;
+    void AddCollector(unsigned short handle, Device device)
+    {
+        collectors.emplace_back(handle, device);
+    }
+    static friend void to_json(nlohmann::json& j, const CollectorData& collector_data)
+    {
+        j = nlohmann::json{ {"collectors", collector_data.collectors} };
+    }
 };
 
 int main(int argc, char* argv[])
