@@ -227,8 +227,8 @@ struct SpindleData
 {
     int spindle_speed;
     int spindle_param_speed;
-    std::map<std::string, int> motor_speeds;
-    std::map<std::string, int> spindle_loads;
+    std::map<std::string, int> spindle_motor_speed;
+    std::map<std::string, int> spindle_load;
     int spindle_override;
     std::string spindle_err = "";
 
@@ -236,24 +236,24 @@ struct SpindleData
     {
         int_data _spindle_speed = GetSpindleSpeed(handle);
         int_data _spindle_param_speed = GetSpindleSpeedParam(handle);
-        map_data _motor_speeds = GetSpindleMotorSpeed(handle);
-        map_data _spindle_loads = GetSpindleLoad(handle);
+        map_data _spindle_motor_speed = GetSpindleMotorSpeed(handle);
+        map_data _spindle_load = GetSpindleLoad(handle);
         int_data _spindle_override = GetSpindleOverride(handle);
 
         spindle_speed = _spindle_speed.data;
         spindle_param_speed = _spindle_param_speed.data;
-        motor_speeds = _motor_speeds.data;
-        spindle_loads = _spindle_loads.data;
+        spindle_motor_speed = _spindle_motor_speed.data;
+        spindle_load = _spindle_load.data;
         spindle_override = _spindle_override.data;
 
         if (_spindle_speed.error)
             spindle_err += "SP SPEED ERR (" + _spindle_speed.error_msg + ");";
         if (_spindle_param_speed.error)
             spindle_err += "SP SPEED PARAM ERR (" + _spindle_param_speed.error_msg + ");";
-        if (_motor_speeds.error)
-            spindle_err += "MOTOR SPEED ERR (" + _motor_speeds.error_msg + ");";
-        if (_spindle_loads.error)
-            spindle_err += "SP LOADS ERR (" + _spindle_loads.error_msg + ");";
+        if (_spindle_motor_speed.error)
+            spindle_err += "MOTOR SPEED ERR (" + _spindle_motor_speed.error_msg + ");";
+        if (_spindle_load.error)
+            spindle_err += "SP LOADS ERR (" + _spindle_load.error_msg + ");";
         if (_spindle_override.error)
             spindle_err += "SOV ERR (" + _spindle_override.error_msg + ");";
     }
@@ -264,8 +264,8 @@ struct SpindleData
         {
             {"spindle_speed", data.spindle_speed},
             {"spindle_param_speed", data.spindle_param_speed},
-            {"motor_speeds", data.motor_speeds},
-            {"spindle_loads", data.spindle_loads},
+            {"spindle_motor_speed", data.spindle_motor_speed},
+            {"spindle_load", data.spindle_load},
             {"spindle_override", data.spindle_override},
             {"spindle_err", data.spindle_err}
         };
