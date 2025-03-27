@@ -35,4 +35,10 @@ int_data GetJogSpeed(unsigned short handle);
 float_data GetServoCurrentLoad(unsigned short handle);
 float_data GetServoCurrentPercentLoad(unsigned short handle);
 map_data GetAllServoLoad(unsigned short handle);
+//spindle data
+int_data GetSpindleSpeed(unsigned short handle);
+int_data GetSpindleSpeedParam(unsigned short handle);
+map_data GetSpindleMotorSpeed(unsigned short handle);
+map_data GetSpindleLoad(unsigned short handle);
+int_data GetSpindleOverride(unsigned short handle);
 #endif

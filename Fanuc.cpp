@@ -255,6 +255,36 @@ float GetJogOverrideValue(short jog)
     }
 }
 
+int GetSpindleOverrideValue(short sp_ov)
+{
+    switch (sp_ov)
+    {
+        case 0: return 0;
+        case 1: return 10;
+        case 2: return 20;
+        case 3: return 30;
+        case 4: return 40;
+        case 5: return 50;
+        case 6: return 60;
+        case 7: return 70;
+        case 8: return 80;
+        case 9: return 90;
+        case 10: return 100;
+        case 11: return 110;
+        case 12: return 120;
+        case 13: return 130;
+        case 14: return 140;
+        case 15: return 150;
+        case 16: return 160;
+        case 17: return 170;
+        case 18: return 180;
+        case 19: return 190;
+        case 20: return 200;
+        default: return 0;
+    }
+}
+
+
 std::string FindShutdowns(const char* data)
 {
     const char* commands[] = { "M00", "M01", "G04" };
@@ -973,3 +1003,161 @@ float_data GetServoCurrentPercentLoad(unsigned short handle)
     return res;
 }
 #pragma endregion
+
+#pragma region Spindle data
+
+int_data GetSpindleSpeed(unsigned short handle)
+{
+    int_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        ODBSPEED buf = {};
+        short type = 1;
+        short ret = cnc_rdspeed(handle, type, &buf);
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+        }
+        else
+            res.data = buf.acts.data;
+    }
+    return res;
+}
+
+int_data GetSpindleSpeedParam(unsigned short handle)
+{
+    int_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        IODBPSD buf;
+        short ret = cnc_rdparam(handle, 3799, -1, sizeof(buf), &buf);
+
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+            return res;
+        }
+        else
+        {
+            res.data = buf.u.ldata;
+        }
+    }
+    return res;
+}
+
+map_data GetSpindleMotorSpeed(unsigned short handle)
+{
+    map_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        ODBSPLOAD buf[MAX_SPINDLE];
+        short num = MAX_SPINDLE;
+        short ret = cnc_rdspmeter(handle, 1, &num, buf);
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+            return res;
+        }
+        else
+        {
+            for (int i = 0; i < num; i++)
+            {
+                std::string name = std::string(1, buf[i].spspeed.name);
+                int value = buf[i].spspeed.data;
+                res.data[name] = value;
+            }
+        }
+    }
+    return res;
+}
+
+map_data GetSpindleLoad(unsigned short handle)
+{
+    map_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        ODBSPLOAD buf[MAX_SPINDLE];
+        short num = MAX_SPINDLE;
+        short ret = cnc_rdspmeter(handle, 1, &num, buf);
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+            return res;
+        }
+        else
+        {
+            for (int i = 0; i < num; i++)
+            {
+                std::string name = std::string(1, buf[i].spload.name);
+                int value = buf[i].spload.data;
+                res.data[name] = value;
+            }
+        }
+    }
+    return res;
+}
+
+int_data GetSpindleOverride(unsigned short handle)
+{
+    int_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        IODBSGNL buf = {};
+        short ret = cnc_rdopnlsgnl(handle, 0x40, &buf);
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+        }
+        else
+            res.data = GetSpindleOverrideValue(buf.spdl_ovrd);
+    }
+    return res;
+}
+
+#pragma endregion
+
+////test func
+//short AxesCount(unsigned short handle)
+//{
+//    ODBSYS sysinfo;
+//    short ret;
+//
+//    ret = cnc_sysinfo(handle, &sysinfo);
+//
+//    short res = 0;
+//    if (ret == EW_OK)
+//    {
+//        res = sysinfo.max_axis;
+//    }
+//    return res;
+//}

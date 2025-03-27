@@ -223,18 +223,69 @@ struct AxesData
     }
 };
 
+struct SpindleData
+{
+    int spindle_speed;
+    int spindle_param_speed;
+    std::map<std::string, int> motor_speeds;
+    std::map<std::string, int> spindle_loads;
+    int spindle_override;
+    std::string spindle_err = "";
+
+    SpindleData(unsigned short handle)
+    {
+        int_data _spindle_speed = GetSpindleSpeed(handle);
+        int_data _spindle_param_speed = GetSpindleSpeedParam(handle);
+        map_data _motor_speeds = GetSpindleMotorSpeed(handle);
+        map_data _spindle_loads = GetSpindleLoad(handle);
+        int_data _spindle_override = GetSpindleOverride(handle);
+
+        spindle_speed = _spindle_speed.data;
+        spindle_param_speed = _spindle_param_speed.data;
+        motor_speeds = _motor_speeds.data;
+        spindle_loads = _spindle_loads.data;
+        spindle_override = _spindle_override.data;
+
+        if (_spindle_speed.error)
+            spindle_err += "SP SPEED ERR (" + _spindle_speed.error_msg + ");";
+        if (_spindle_param_speed.error)
+            spindle_err += "SP SPEED PARAM ERR (" + _spindle_param_speed.error_msg + ");";
+        if (_motor_speeds.error)
+            spindle_err += "MOTOR SPEED ERR (" + _motor_speeds.error_msg + ");";
+        if (_spindle_loads.error)
+            spindle_err += "SP LOADS ERR (" + _spindle_loads.error_msg + ");";
+        if (_spindle_override.error)
+            spindle_err += "SOV ERR (" + _spindle_override.error_msg + ");";
+    }
+
+    static friend void to_json(nlohmann::json& j, const SpindleData& data)
+    {
+        j = nlohmann::json
+        {
+            {"spindle_speed", data.spindle_speed},
+            {"spindle_param_speed", data.spindle_param_speed},
+            {"motor_speeds", data.motor_speeds},
+            {"spindle_loads", data.spindle_loads},
+            {"spindle_override", data.spindle_override},
+            {"spindle_err", data.spindle_err}
+        };
+    }
+};
+
 struct Collector
 {
     Device device;
     ModeData mode_data;
     ProgramData program_data;
     AxesData axes_data;
+    SpindleData spindle_data;
 
     Collector(unsigned short handle, const Device device) :
         device(device),
         mode_data(handle, device.series),
         program_data(handle),
-        axes_data(handle)
+        axes_data(handle),
+        spindle_data(handle)
     {}
 
     static friend void to_json(nlohmann::json& j, const Collector& collector)
@@ -244,7 +295,8 @@ struct Collector
             {"device", collector.device},
             {"mode_data", collector.mode_data},
             {"program_data", collector.program_data},
-            {"axes_data", collector.axes_data}
+            {"axes_data", collector.axes_data},
+            {"spindle_data", collector.spindle_data}
         };
     };
 };
