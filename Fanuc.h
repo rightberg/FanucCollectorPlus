@@ -41,4 +41,7 @@ int_data GetSpindleSpeedParam(unsigned short handle);
 map_data GetSpindleMotorSpeed(unsigned short handle);
 map_data GetSpindleLoad(unsigned short handle);
 int_data GetSpindleOverride(unsigned short handle);
+//alarm data
+str_data GetEmergencyStop(unsigned short handle, std::string series);
+str_data GetAlarmStatus(unsigned short handle, std::string series);
 #endif

@@ -272,6 +272,37 @@ struct SpindleData
     }
 };
 
+struct AlarmData
+{
+    std::string emergency;
+    std::string alarm_status;
+    std::string alarm_err = "";
+
+    AlarmData(unsigned short handle, const std::string& series)
+    {
+        str_data _emergency = GetEmergencyStop(handle, series);
+        str_data _alarm_status = GetAlarmStatus(handle, series);
+
+        emergency = _emergency.data;
+        alarm_status = _alarm_status.data;
+
+        if (_emergency.error)
+            alarm_err += "EMG ERR (" + _emergency.error_msg + ");";
+        if (_alarm_status.error)
+            alarm_err += "ALARM STATUS ERR (" + _alarm_status.error_msg + ");";
+    }
+
+    static friend void to_json(nlohmann::json& j, const AlarmData& data)
+    {
+        j = nlohmann::json
+        {
+            {"emergency", data.emergency},
+            {"alarm_status", data.alarm_status},
+            {"alarm_err", data.alarm_err}
+        };
+    }
+};
+
 struct Collector
 {
     Device device;
@@ -279,13 +310,15 @@ struct Collector
     ProgramData program_data;
     AxesData axes_data;
     SpindleData spindle_data;
+    AlarmData alarm_data;
 
     Collector(unsigned short handle, const Device device) :
         device(device),
         mode_data(handle, device.series),
         program_data(handle),
         axes_data(handle),
-        spindle_data(handle)
+        spindle_data(handle),
+        alarm_data(handle, device.series)
     {}
 
     static friend void to_json(nlohmann::json& j, const Collector& collector)
@@ -296,7 +329,8 @@ struct Collector
             {"mode_data", collector.mode_data},
             {"program_data", collector.program_data},
             {"axes_data", collector.axes_data},
-            {"spindle_data", collector.spindle_data}
+            {"spindle_data", collector.spindle_data},
+            {"alarm_data", collector.alarm_data}
         };
     };
 };

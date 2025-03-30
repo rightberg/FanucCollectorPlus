@@ -180,6 +180,70 @@ std::string GetLoadExcessString(int mstb, const std::string series)
     return "Серия контроллера не поддерживается";
 }
 
+std::string GetAlarmString(int alarm, const std::string series)
+{
+    if (series == "0i-D" || series == "0i-F")
+    {
+        switch (alarm)
+        {
+            case 0: return "Включение параметрического переключателя (PARAMETER SWITCH ON)";
+            case 1: return "Установка параметра при выключении питания (POWER OFF PARAMETER SET)";
+            case 2: return "Ошибка ввода/вывода (I/O ERROR)";
+            case 3: return "Предварительный P/S (FOREGROUND P/S)";
+            case 4: return "Перемещение за пределы, внешние данные (OVERTRAVEL, EXTERNAL DATA)";
+            case 5: return "Сигнал перегрева (OVERHEAT ALARM)";
+            case 6: return "Сигнал ошибки сервопривода (SERVO ALARM)";
+            case 7: return "Ошибка ввода/вывода данных (DATA I/O ERROR)";
+            case 8: return "Сигнал ошибки макроса (MACRO ALARM)";
+            case 9: return "Сигнал ошибки шпинделя (SPINDLE ALARM)";
+            case 10: return "Другие сигналы ошибки (OTHER ALARM)";
+            case 11: return "Ошибка функций предотвращения неисправностей (MALFUNCTION PREVENT FUNCTIONS)";
+            case 12: return "Фоновый P/S (BACKGROUND P/S)";
+            case 13: return "Ошибка синхронизации (SYNCHRONIZED ERROR)";
+            case 15: return "Внешнее сообщение об ошибке (EXTERNAL ALARM MESSAGE)";
+            default: return "Неизвестный сигнал (UNKNOWN SIGNAL)";
+        }
+    }
+    return "Серия контроллера не поддерживается";
+}
+
+std::string GetAlarmStatusString(int alarm, const std::string series)
+{
+    if (series == "0i-D" || series == "0i-F")
+    {
+        switch (alarm)
+        {
+            case 0: return "****(Others))";
+            case 1: return "Сигнал тревоги (ALARM)";
+            case 2: return "Низкий уровень батареи (BATTERY LOW)";
+            case 3: return "Предупреждение: Вентилятор (CNC, SA)(FAN)";
+            case 4: return "Предупреждение: P/S (блок питания) (PS Warning)";
+            case 5: return "Предупреждение FSSB (FSSB Warning)";
+            case 6: return "Предупреждение утечки (INSULATE Warning)";
+            case 7: return "Предупреждение датчика положения (Encoder Warning)";
+            case 8: return "Низкий уровень батареи (PMC alarm)";
+            default: return "Неизвестный сигнал тревоги";
+        }
+    }
+    return "Серия контроллера не поддерживается";
+}
+
+std::string GetEmergencyString(int emg, const std::string series)
+{
+    if (series == "0i-D" || series == "0i-F")
+    {
+        switch (emg)
+        {
+        case 0: return "****(Not emergency)";
+        case 1: return "Аварийная ситуация (Emergency)";
+        case 2: return "Сброс (Reset)";
+        case 3: return "Ожидание (Wait, FS35i only)";
+        default: return "Неизвестное состояние";
+        }
+    }
+    return "Серия контроллера не поддерживается";
+}
+
 std::string GetUnitString(int unit)
 {
     switch (unit)
@@ -1146,6 +1210,58 @@ int_data GetSpindleOverride(unsigned short handle)
 
 #pragma endregion
 
+
+#pragma region Alarm data
+
+str_data GetEmergencyStop(unsigned short handle, std::string series)
+{
+    str_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        ODBST buf = {};
+        short ret = cnc_statinfo(handle, &buf);
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+        }
+        else
+        {
+            res.data = GetEmergencyString(buf.emergency, series);
+        }
+    }
+    return res;
+}
+
+str_data GetAlarmStatus(unsigned short handle, std::string series)
+{
+    str_data res = {};
+    if (handle == 0)
+    {
+        res.error = true;
+        res.error_msg = "НЕТ ДОСТУПА";
+    }
+    else
+    {
+        ODBST buf = {};
+        short ret = cnc_statinfo(handle, &buf);
+        if (ret != EW_OK)
+        {
+            res.error = true;
+            res.error_msg = GetCncErrorMessage(ret);
+        }
+        else
+            res.data = GetAlarmStatusString(buf.alarm, series);
+    }
+    return res;
+}
+
+#pragma endregion
 ////test func
 //short AxesCount(unsigned short handle)
 //{
