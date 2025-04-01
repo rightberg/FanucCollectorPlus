@@ -7,43 +7,67 @@
 
 typedef struct void_func
 {
-	bool error;
 	std::string error_msg;
+
+	bool IsError() const
+	{
+		return !error_msg.empty();
+	}
 } void_func;
 
 typedef struct str_data
 {
-	bool error;
 	std::string data;
 	std::string error_msg;
+
+	bool IsError() const
+	{
+		return !error_msg.empty();
+	}
 } str_data;
 
 typedef struct int_data
 {
-	bool error;
 	int data;
 	std::string error_msg;
+
+	bool IsError() const
+	{
+		return !error_msg.empty();
+	}
 } int_data;
 
 typedef struct float_data
 {
-	bool error;
 	float data;
 	std::string error_msg;
+
+	bool IsError() const
+	{
+		return !error_msg.empty();
+	}
 } float_data;
 
 typedef struct ushort_data
 {
-	bool error;
 	unsigned short  data;
 	std::string error_msg;
+
+	bool IsError() const 
+	{
+		return !error_msg.empty();
+	}
 } ushort_data;
 
 typedef struct map_data
 {
-	bool error;
 	std::map<std::string,int> data;
 	std::string error_msg;
+
+	bool IsError() const 
+	{
+		return !error_msg.empty();
+	}
 } map_data;
 
 #endif

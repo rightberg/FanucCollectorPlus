@@ -371,10 +371,7 @@ ushort_data GetHandle(std::string address, int port, int timeout)
     ushort_data res = {};
     short ret = cnc_allclibhndl3(address.c_str(), port, timeout, &res.data);
     if (ret != EW_OK)
-    {
-        res.error = true;
         res.error_msg = GetCncErrorMessage(ret);
-    }
     return res;
 }
 
@@ -383,10 +380,7 @@ void_func FreeHandle(unsigned short handle)
     void_func res = {};
     short ret = cnc_freelibhndl(handle);
     if (ret != EW_OK)
-    {
-        res.error = true;
         res.error_msg = GetCncErrorMessage(ret);
-    }
     return res;
 }
 
@@ -394,19 +388,13 @@ str_data GetMainPrgName(unsigned short handle)
 {
     str_data res = {};
 	if (handle == 0) 
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-	}
 	else 
     {
 		ODBEXEPRG buf = {};
 		short ret = cnc_exeprgname(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.name;
 	}
@@ -417,19 +405,13 @@ str_data GetMode(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetModeString(buf.aut, series);
     }
@@ -440,19 +422,13 @@ str_data GetRunState(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetRunStateString(buf.run, series);
     }
@@ -463,19 +439,13 @@ str_data GetStatus(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetStatusString(buf.edit);
     }
@@ -486,10 +456,7 @@ str_data GetShutdowns(unsigned short handle)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         unsigned short length = 256;
@@ -497,10 +464,7 @@ str_data GetShutdowns(unsigned short handle)
         char buf[256];
         short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = FindShutdowns(buf);
     }
@@ -511,10 +475,7 @@ str_data GetHightSpeed(unsigned short handle)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         unsigned short length = 256;
@@ -522,10 +483,7 @@ str_data GetHightSpeed(unsigned short handle)
         char buf[256];
         short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
         {
             if (strstr(buf, "G00"))
@@ -541,19 +499,13 @@ str_data GetAxisMotion(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetAxisMotionString(buf.motion, series);
     }
@@ -564,19 +516,13 @@ str_data GetMstb(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetMstbString(buf.mstb, series);
     }
@@ -587,19 +533,13 @@ str_data GetLoadExcess(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         long alarm;
         short ret = cnc_alarm2(handle, &alarm);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetLoadExcessString(alarm, series);
     }
@@ -614,19 +554,13 @@ int_data GetMainPrgNumber(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBPRO buf = {};
         short ret = cnc_rdprgnum(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.mdata;
     }
@@ -637,19 +571,13 @@ int_data GetSubPrgNumber(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBPRO buf = {};
         short ret = cnc_rdprgnum(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.data;
     }
@@ -660,10 +588,7 @@ str_data GetFrame(unsigned short handle)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         unsigned short length = 256;
@@ -671,15 +596,11 @@ str_data GetFrame(unsigned short handle)
         char buf[256];
         short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
         {
             if (length == 0 || blknum < 0 || blknum + length > sizeof(buf)) 
             {
-                res.error = true;
                 res.error_msg = "Некорректные данные блока";
             }
             else
@@ -695,20 +616,13 @@ int_data GetPartsCount(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBPSD buf = {};
         short ret = cnc_rdparam(handle, 6771, 0, 8, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-            return res;
-        }
         else
         {
             long prm = buf.u.rdata.prm_val;
@@ -716,7 +630,6 @@ int_data GetPartsCount(unsigned short handle)
 
             if (dec < 0 || dec > 10) 
             {
-                res.error = true;
                 res.error_msg = "Некорректное значение dec_val";
                 return res;
             }
@@ -731,20 +644,14 @@ int_data GetToolNumber(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBTLMNG buf = {};
         short data_num = 1;
         short ret = cnc_rdtool(handle, 1, &data_num, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.T_code;
     }
@@ -755,19 +662,13 @@ int_data GetFrameNum(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBSEQ buf = {};
         short ret = cnc_rdseqnum(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.data;
     }
@@ -783,20 +684,14 @@ str_data GetFeedUnit(unsigned short handle)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBSPEED buf = {};
         short type = 0;
         short ret = cnc_rdspeed(handle, type, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetUnitString(buf.actf.unit);
     }
@@ -807,20 +702,14 @@ str_data GetSpindleUnit(unsigned short handle)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBSPEED buf = {};
         short type = 1;
         short ret = cnc_rdspeed(handle, type, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetUnitString(buf.actf.unit);
     }
@@ -831,19 +720,13 @@ int_data GetFeedRate(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBACT buf = {};
         short ret = cnc_actf(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.data;
     }
@@ -854,19 +737,13 @@ int_data GetFeedOverride(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBSGNL buf = {};
         short ret = cnc_rdopnlsgnl(handle, 0x20, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetFeedOverrideValue(buf.feed_ovrd);
     }
@@ -879,19 +756,13 @@ float_data GetJogOverride(unsigned short handle)
 {
     float_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBSGNL buf = {};
         short ret = cnc_rdopnlsgnl(handle, 0x20, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetJogOverrideValue(buf.jog_ovrd);
     }
@@ -903,10 +774,7 @@ int_data GetJogSpeed(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBAXDT buf[MAX_AXIS];
@@ -914,10 +782,7 @@ int_data GetJogSpeed(unsigned short handle)
         short type = 5;
         short ret = cnc_rdaxisdata(handle, 5, &type, 5, &lenght, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
         {
             bool jog_enabled = false;
@@ -930,7 +795,6 @@ int_data GetJogSpeed(unsigned short handle)
                     return res;
                 }
             }
-            res.error = true;
             res.error_msg = "Jog отключен";
         }
     }
@@ -941,21 +805,14 @@ map_data GetAllServoLoad(unsigned short handle)
 {
     map_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         short num = MAX_AXIS;
         ODBSVLOAD buf[MAX_AXIS] = {};
         short ret = cnc_rdsvmeter(handle, &num, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-            return res;
-        }
         else
         {
             for (int i = 0; i < num; i++)
@@ -974,27 +831,19 @@ float_data GetServoCurrentLoad(unsigned short handle)
 {
     float_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBPSD n = {};
         short ret = cnc_rdparam(handle, 2086, 0, 8, &n);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-            return res;
-        }
         else
         {
             ODBAD parameter = {};
             short ret = cnc_adcnv(handle, 2, 2, &parameter);
             if (ret != EW_OK)
             {
-                res.error = true;
                 res.error_msg = GetCncErrorMessage(ret);
                 return res;
             }
@@ -1005,7 +854,6 @@ float_data GetServoCurrentLoad(unsigned short handle)
 
                 if (dec < 0 || dec > 10)
                 {
-                    res.error = true;
                     res.error_msg = "Некорректное значение dec_val";
                     return res;
                 }
@@ -1026,24 +874,16 @@ float_data GetServoCurrentPercentLoad(unsigned short handle)
 {
     float_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     float_data current_data = GetServoCurrentLoad(handle);
-    if (current_data.error)
-    {
-        res.error = true;
+    if (current_data.IsError())
         res.error_msg = current_data.error_msg;
-        return res;
-    }
     else
     {
         IODBPSD max = {};
         short ret = cnc_rdparam(handle, 2165, 0, 8, &max);
         if (ret != EW_OK)
         {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
             return res;
         }
@@ -1054,7 +894,6 @@ float_data GetServoCurrentPercentLoad(unsigned short handle)
 
             if (dec < 0 || dec > 10)
             {
-                res.error = true;
                 res.error_msg = "Некорректное значение dec_val";
                 return res;
             }
@@ -1074,20 +913,14 @@ int_data GetSpindleSpeed(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBSPEED buf = {};
         short type = 1;
         short ret = cnc_rdspeed(handle, type, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = buf.acts.data;
     }
@@ -1098,25 +931,16 @@ int_data GetSpindleSpeedParam(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBPSD buf;
         short ret = cnc_rdparam(handle, 3799, -1, sizeof(buf), &buf);
 
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-            return res;
-        }
         else
-        {
             res.data = buf.u.ldata;
-        }
     }
     return res;
 }
@@ -1125,21 +949,14 @@ map_data GetSpindleMotorSpeed(unsigned short handle)
 {
     map_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBSPLOAD buf[MAX_SPINDLE];
         short num = MAX_SPINDLE;
         short ret = cnc_rdspmeter(handle, 1, &num, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-            return res;
-        }
         else
         {
             for (int i = 0; i < num; i++)
@@ -1157,21 +974,14 @@ map_data GetSpindleLoad(unsigned short handle)
 {
     map_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBSPLOAD buf[MAX_SPINDLE];
         short num = MAX_SPINDLE;
         short ret = cnc_rdspmeter(handle, 1, &num, buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-            return res;
-        }
         else
         {
             for (int i = 0; i < num; i++)
@@ -1189,19 +999,13 @@ int_data GetSpindleOverride(unsigned short handle)
 {
     int_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         IODBSGNL buf = {};
         short ret = cnc_rdopnlsgnl(handle, 0x40, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetSpindleOverrideValue(buf.spdl_ovrd);
     }
@@ -1217,23 +1021,15 @@ str_data GetEmergencyStop(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
-        {
             res.data = GetEmergencyString(buf.emergency, series);
-        }
     }
     return res;
 }
@@ -1242,19 +1038,13 @@ str_data GetAlarmStatus(unsigned short handle, std::string series)
 {
     str_data res = {};
     if (handle == 0)
-    {
-        res.error = true;
         res.error_msg = "НЕТ ДОСТУПА";
-    }
     else
     {
         ODBST buf = {};
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
-        {
-            res.error = true;
             res.error_msg = GetCncErrorMessage(ret);
-        }
         else
             res.data = GetAlarmStatusString(buf.alarm, series);
     }

@@ -71,21 +71,21 @@ struct ModeData
         mstb = _mstb.data;
         load_excess = _load_excess.data;
 
-        if (_mode.error)
+        if (_mode.IsError())
             mode_err += "MODE ERR (" + _mode.error_msg + ");";
-        if (_run_state.error)
+        if (_run_state.IsError())
             mode_err += "RUN STATE ERR (" + _run_state.error_msg + ");";
-        if (_status.error)
+        if (_status.IsError())
             mode_err += "STATUS ERR (" + _status.error_msg + ");";
-        if (_shutdowns.error)
+        if (_shutdowns.IsError())
             mode_err += "SHUTDOWNS ERR (" + _shutdowns.error_msg + ");";
-        if (_hight_speed.error)
+        if (_hight_speed.IsError())
             mode_err += "HIGHT SPEED ERR (" + _hight_speed.error_msg + ");";
-        if (_axis_motion.error)
+        if (_axis_motion.IsError())
             mode_err += "AXIS MOTION ERR (" + _axis_motion.error_msg + ");";
-        if (_mstb.error)
+        if (_mstb.IsError())
             mode_err += "MSTB ERR (" + _mstb.error_msg + ");";
-        if (_load_excess.error)
+        if (_load_excess.IsError())
             mode_err += "LOAD EXCESS ERR (" + _load_excess.error_msg + ");";
 
     }
@@ -133,17 +133,17 @@ struct ProgramData
         tool_number = _tool_number.data;
         frame_number = _frame_number.data;
 
-        if (_frame.error)
+        if (_frame.IsError())
             prg_err += "FRAME ERR (" + _frame.error_msg + ");";
-        if (_main_prog_number.error)
+        if (_main_prog_number.IsError())
             prg_err += "MAIN PRG NUM ERR (" + _main_prog_number.error_msg + ");";
-        if (_sub_prog_number.error)
+        if (_sub_prog_number.IsError())
             prg_err += "SUB PRG NUM ERR (" + _sub_prog_number.error_msg + ");";
-        if (_parts_count.error)
+        if (_parts_count.IsError())
             prg_err += "PARTS COUNT ERR (" + _parts_count.error_msg + ");";
-        if (_tool_number.error)
+        if (_tool_number.IsError())
             prg_err += "TOOL NUMBER ERR (" + _tool_number.error_msg + ");";
-        if (_frame_number.error)
+        if (_frame_number.IsError())
             prg_err += "FRAME NUMBER ERR (" + _frame_number.error_msg + ");";
     }
 
@@ -191,19 +191,19 @@ struct AxesData
         current_load_percent = _current_load_percent.data;
         servo_loads = _servo_loads.data;
 
-        if (_feedrate.error)
+        if (_feedrate.IsError())
             axes_err += "FEEDRATE ERR (" + _feedrate.error_msg + ");";
-        if (_feed_override.error)
+        if (_feed_override.IsError())
             axes_err += "FOV ERR (" + _feed_override.error_msg + ");";
-        if (_jog_override.error)
+        if (_jog_override.IsError())
             axes_err += "JOV ERR (" + _jog_override.error_msg + ");";
-        if (_jog_speed.error)
+        if (_jog_speed.IsError())
             axes_err += "JOG SPEED ERR (" + _jog_speed.error_msg + ");";
-        if (_current_load.error)
+        if (_current_load.IsError())
             axes_err += "CURRENT LOAD ERR (" + _current_load.error_msg + ");";
-        if (_current_load_percent.error)
+        if (_current_load_percent.IsError())
             axes_err += "CURRENT LOAD % ERR (" + _current_load_percent.error_msg + ");";
-        if (_servo_loads.error)
+        if (_servo_loads.IsError())
             axes_err += "SERVO LOAD ERR (" + _servo_loads.error_msg + ");";
     }
 
@@ -246,15 +246,15 @@ struct SpindleData
         spindle_load = _spindle_load.data;
         spindle_override = _spindle_override.data;
 
-        if (_spindle_speed.error)
+        if (_spindle_speed.IsError())
             spindle_err += "SP SPEED ERR (" + _spindle_speed.error_msg + ");";
-        if (_spindle_param_speed.error)
+        if (_spindle_param_speed.IsError())
             spindle_err += "SP SPEED PARAM ERR (" + _spindle_param_speed.error_msg + ");";
-        if (_spindle_motor_speed.error)
+        if (_spindle_motor_speed.IsError())
             spindle_err += "MOTOR SPEED ERR (" + _spindle_motor_speed.error_msg + ");";
-        if (_spindle_load.error)
+        if (_spindle_load.IsError())
             spindle_err += "SP LOADS ERR (" + _spindle_load.error_msg + ");";
-        if (_spindle_override.error)
+        if (_spindle_override.IsError())
             spindle_err += "SOV ERR (" + _spindle_override.error_msg + ");";
     }
 
@@ -286,9 +286,9 @@ struct AlarmData
         emergency = _emergency.data;
         alarm_status = _alarm_status.data;
 
-        if (_emergency.error)
+        if (_emergency.IsError())
             alarm_err += "EMG ERR (" + _emergency.error_msg + ");";
-        if (_alarm_status.error)
+        if (_alarm_status.IsError())
             alarm_err += "ALARM STATUS ERR (" + _alarm_status.error_msg + ");";
     }
 
@@ -370,7 +370,7 @@ int main(int argc, char* argv[])
         {
             ushort_data handle = GetHandle(device.address, device.port, 10);
             col_data.AddCollector(handle.data, device);
-            if(!handle.error)
+            if(!handle.IsError())
                 FreeHandle(handle.data);
         }
         nlohmann::json output_json = col_data;
