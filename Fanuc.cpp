@@ -619,8 +619,8 @@ int_data GetPartsCount(unsigned short handle)
         res.error_msg = "НЕТ ДОСТУПА";
     else
     {
-        IODBPSD buf = {};
-        short ret = cnc_rdparam(handle, 6771, 0, 8, &buf);
+        IODBPSD buf;
+        short ret = cnc_rdparam(handle, 6771, 0, sizeof(buf), &buf);
         if (ret != EW_OK)
             res.error_msg = GetCncErrorMessage(ret);
         else
@@ -834,8 +834,8 @@ float_data GetServoCurrentLoad(unsigned short handle)
         res.error_msg = "НЕТ ДОСТУПА";
     else
     {
-        IODBPSD n = {};
-        short ret = cnc_rdparam(handle, 2086, 0, 8, &n);
+        IODBPSD n;
+        short ret = cnc_rdparam(handle, 2086, 0, sizeof(n), &n);
         if (ret != EW_OK)
             res.error_msg = GetCncErrorMessage(ret);
         else
@@ -881,7 +881,7 @@ float_data GetServoCurrentPercentLoad(unsigned short handle)
     else
     {
         IODBPSD max = {};
-        short ret = cnc_rdparam(handle, 2165, 0, 8, &max);
+        short ret = cnc_rdparam(handle, 2165, 0, sizeof(max), &max);
         if (ret != EW_OK)
         {
             res.error_msg = GetCncErrorMessage(ret);
