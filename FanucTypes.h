@@ -5,6 +5,22 @@
 #include <iostream>
 #include <map>
 
+typedef struct fanuc_data
+{
+	unsigned short  ushort_data;
+	int int_data;
+	float float_data;
+	std::string str_data;
+	std::string error_msg;
+	std::map<std::string, int> data;
+
+	bool IsError() const
+	{
+		return !error_msg.empty();
+	}
+} fanuc_data;
+
+
 typedef struct void_func
 {
 	std::string error_msg;
