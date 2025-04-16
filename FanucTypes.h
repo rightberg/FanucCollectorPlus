@@ -5,22 +5,6 @@
 #include <iostream>
 #include <map>
 
-typedef struct fanuc_data
-{
-	unsigned short  ushort_data;
-	int int_data;
-	float float_data;
-	std::string str_data;
-	std::string error_msg;
-	std::map<std::string, int> data;
-
-	bool IsError() const
-	{
-		return !error_msg.empty();
-	}
-} fanuc_data;
-
-
 typedef struct void_func
 {
 	std::string error_msg;
@@ -34,55 +18,77 @@ typedef struct void_func
 typedef struct str_data
 {
 	std::string data;
-	std::string error_msg;
+    short error;
 
-	bool IsError() const
+	bool IsError() const 
 	{
-		return !error_msg.empty();
+		return error != 0;
 	}
 } str_data;
 
 typedef struct int_data
 {
 	int data;
-	std::string error_msg;
+	short error;
 
 	bool IsError() const
 	{
-		return !error_msg.empty();
+		return error != 0;
 	}
 } int_data;
+
+typedef struct long_data
+{
+	long data;
+	short error;
+
+	bool IsError() const
+	{
+		return error != 0;
+	}
+} long_data;
 
 typedef struct float_data
 {
 	float data;
-	std::string error_msg;
+	short error;
 
 	bool IsError() const
 	{
-		return !error_msg.empty();
+		return error != 0;
 	}
 } float_data;
+
+typedef struct short_data
+{
+	short  data;
+	short error;
+
+	bool IsError() const
+	{
+		return error != 0;
+	}
+} short_data;
 
 typedef struct ushort_data
 {
 	unsigned short  data;
-	std::string error_msg;
+	short error;
 
-	bool IsError() const 
+	bool IsError() const
 	{
-		return !error_msg.empty();
+		return error != 0;
 	}
 } ushort_data;
 
 typedef struct map_data
 {
 	std::map<std::string,int> data;
-	std::string error_msg;
+	short error;
 
-	bool IsError() const 
+	bool IsError() const
 	{
-		return !error_msg.empty();
+		return error != 0;
 	}
 } map_data;
 

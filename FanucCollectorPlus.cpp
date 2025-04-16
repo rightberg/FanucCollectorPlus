@@ -41,52 +41,125 @@ struct Device
 
 struct ModeData
 {
-    std::string mode;
-    std::string run_state;
-    std::string status;
-    std::string shutdowns;
-    std::string hight_speed;
-    std::string axis_motion;
-    std::string mstb;
-    std::string load_excess;
-    std::string mode_err = "";
+    short mode = 0;
+    short run_state = 0;
+    short status = 0;
+    short shutdowns = 0;
+    short hight_speed = 0;
+    short axis_motion = 0;
+    short mstb = 0;
+    long load_excess = 0;
+
+    std::string mode_str = "";
+    std::string run_state_str = "";
+    std::string status_str = "";
+    std::string shutdowns_str = "";
+    std::string hight_speed_str = "";
+    std::string axis_motion_str = "";
+    std::string mstb_str = "";
+    std::string load_excess_str = "";
+
+    std::vector<short> mode_errors = std::vector<short>(8);
+    std::vector<std::string> mode_errors_str = std::vector<std::string>(8);
 
     ModeData(unsigned short handle, const std::string& series)
     {
-        str_data _mode = GetMode(handle, series);
-        str_data _run_state = GetRunState(handle, series);
-        str_data _status = GetStatus(handle, series);
-        str_data _shutdowns = GetShutdowns(handle);
-        str_data _hight_speed = GetHightSpeed(handle);
-        str_data _axis_motion = GetAxisMotion(handle, series);
-        str_data _mstb = GetMstb(handle, series);
-        str_data _load_excess = GetLoadExcess(handle, series);
-
-        mode = _mode.data;
-        run_state = _run_state.data;
-        status = _status.data;
-        shutdowns = _shutdowns.data;
-        hight_speed = _hight_speed.data;
-        axis_motion = _axis_motion.data;
-        mstb = _mstb.data;
-        load_excess = _load_excess.data;
+        short_data _mode = GetMode(handle, series);
+        short_data _run_state = GetRunState(handle, series);
+        short_data _status = GetStatus(handle, series);
+        short_data _shutdowns = GetShutdowns(handle);
+        short_data _hight_speed = GetHightSpeed(handle);
+        short_data _axis_motion = GetAxisMotion(handle, series);
+        short_data _mstb = GetMstb(handle, series);
+        long_data _load_excess = GetLoadExcess(handle, series);
 
         if (_mode.IsError())
-            mode_err += "MODE ERR (" + _mode.error_msg + ");";
+        {
+            mode_errors[0] = _mode.error;
+            mode_errors_str[0] = GetCncErrorMessage(_mode.error);
+        }
+        else
+        {
+            mode = _mode.data;
+            mode_str = GetModeString(mode, series);
+        }
+
         if (_run_state.IsError())
-            mode_err += "RUN STATE ERR (" + _run_state.error_msg + ");";
+        {
+            mode_errors[1] = _run_state.error;
+            mode_errors_str[1] = GetCncErrorMessage(_run_state.error);
+        }
+        else
+        {
+            run_state = _run_state.data;
+            run_state_str = GetRunStateString(run_state, series);
+        }
+
         if (_status.IsError())
-            mode_err += "STATUS ERR (" + _status.error_msg + ");";
+        {
+            mode_errors[2] = _status.error;
+            mode_errors_str[2] = GetCncErrorMessage(_status.error);
+        }
+        else
+        {
+            status = _status.data;
+            status_str = GetStatusString(status);
+        }
+
         if (_shutdowns.IsError())
-            mode_err += "SHUTDOWNS ERR (" + _shutdowns.error_msg + ");";
+        {
+            mode_errors[3] = _shutdowns.error;
+            mode_errors_str[3] = GetCncErrorMessage(_shutdowns.error);
+        }
+        else
+        {
+            shutdowns = _shutdowns.data;
+            shutdowns_str = GetShutdownsString(shutdowns);
+        }
+
         if (_hight_speed.IsError())
-            mode_err += "HIGHT SPEED ERR (" + _hight_speed.error_msg + ");";
+        {
+            mode_errors[4] = _hight_speed.error;
+            mode_errors_str[4] = GetCncErrorMessage(_hight_speed.error);
+        }
+        else
+        {
+            hight_speed = _hight_speed.data;
+            hight_speed_str = GetHightSpeedString(hight_speed);
+        }
+
         if (_axis_motion.IsError())
-            mode_err += "AXIS MOTION ERR (" + _axis_motion.error_msg + ");";
+        {
+            mode_errors[5] = _axis_motion.error;
+            mode_errors_str[5] = GetCncErrorMessage(_axis_motion.error);
+        }
+        else
+        {
+            axis_motion = _axis_motion.data;
+            axis_motion_str = GetAxisMotionString(axis_motion, series);
+        }
+
         if (_mstb.IsError())
-            mode_err += "MSTB ERR (" + _mstb.error_msg + ");";
+        {
+            mode_errors[6] = _mstb.error;
+            mode_errors_str[6] = GetCncErrorMessage(_mstb.error);
+        }
+        else
+        {
+            mstb = _mstb.data;
+            mstb_str = GetMstbString(mstb, series);
+        }
+
         if (_load_excess.IsError())
-            mode_err += "LOAD EXCESS ERR (" + _load_excess.error_msg + ");";
+        {
+            mode_errors[7] = _load_excess.error;
+            mode_errors_str[7] = GetCncErrorMessage(_load_excess.error);
+        }
+        else
+        {
+            load_excess = _load_excess.data;
+            load_excess_str = GetLoadExcessString(load_excess, series);
+        }
 
     }
 
@@ -102,49 +175,88 @@ struct ModeData
             {"axis_motion", data.axis_motion},
             {"mstb", data.mstb},
             {"load_excess", data.load_excess},
-            {"mode_err", data.mode_err}
+            {"mode_str", data.mode_str},
+            {"run_state_str", data.run_state_str},
+            {"status_str", data.status_str},
+            {"shutdowns_str", data.shutdowns_str},
+            {"hight_speed_str", data.hight_speed_str},
+            {"axis_motion_str", data.axis_motion_str},
+            {"mstb_str", data.mstb_str},
+            {"load_excess_str", data.load_excess_str},
+            {"mode_errors", data.mode_errors},
+            {"mode_errors_str", data.mode_errors_str}
         };
     };
 };
 
 struct ProgramData
 {
-    std::string frame;
-    int main_prog_number;
-    int sub_prog_number;
-    int parts_count;
-    int tool_number;
-    int frame_number;
-    std::string prg_err = "";
+    std::string frame = "";
+    short main_prog_number = 0;
+    short sub_prog_number = 0;
+    int parts_count = 0;
+    long tool_number = 0;
+    long frame_number = 0;
+
+    std::vector<short> program_errors = std::vector<short>(6);
+    std::vector<std::string> program_errors_str = std::vector<std::string>(6);
 
     ProgramData(unsigned short handle)
     {
         str_data _frame = GetFrame(handle);
-        int_data _main_prog_number = GetMainPrgNumber(handle);
-        int_data _sub_prog_number = GetSubPrgNumber(handle);
+        short_data _main_prog_number = GetMainPrgNumber(handle);
+        short_data _sub_prog_number = GetSubPrgNumber(handle);
         int_data _parts_count = GetPartsCount(handle);
-        int_data _tool_number = GetToolNumber(handle);
-        int_data _frame_number = GetFrameNum(handle);
-
-        frame = _frame.data;
-        main_prog_number = _main_prog_number.data;
-        sub_prog_number = _sub_prog_number.data;
-        parts_count = _parts_count.data;
-        tool_number = _tool_number.data;
-        frame_number = _frame_number.data;
+        long_data _tool_number = GetToolNumber(handle);
+        long_data _frame_number = GetFrameNumber(handle);
 
         if (_frame.IsError())
-            prg_err += "FRAME ERR (" + _frame.error_msg + ");";
+        {
+            program_errors[0] = _frame.error;
+            program_errors_str[0] = GetCncErrorMessage(_frame.error);
+        }
+        else
+            frame = _frame.data;
+
         if (_main_prog_number.IsError())
-            prg_err += "MAIN PRG NUM ERR (" + _main_prog_number.error_msg + ");";
+        {
+            program_errors[1] = _main_prog_number.error;
+            program_errors_str[1] = GetCncErrorMessage(_main_prog_number.error);
+        }
+        else
+            main_prog_number = _main_prog_number.data;
+
         if (_sub_prog_number.IsError())
-            prg_err += "SUB PRG NUM ERR (" + _sub_prog_number.error_msg + ");";
+        {
+            program_errors[2] = _sub_prog_number.error;
+            program_errors_str[2] = GetCncErrorMessage(_sub_prog_number.error);
+        }
+        else
+            sub_prog_number = _sub_prog_number.data;
+
         if (_parts_count.IsError())
-            prg_err += "PARTS COUNT ERR (" + _parts_count.error_msg + ");";
+        {
+            program_errors[3] = _parts_count.error;
+            program_errors_str[3] = GetCncErrorMessage(_parts_count.error);
+        }
+        else
+            parts_count = _parts_count.data;
+
         if (_tool_number.IsError())
-            prg_err += "TOOL NUMBER ERR (" + _tool_number.error_msg + ");";
+        {
+            program_errors[4] = _tool_number.error;
+            program_errors_str[4] = GetCncErrorMessage(_tool_number.error);
+        }
+        else
+            tool_number = _tool_number.data;
+
         if (_frame_number.IsError())
-            prg_err += "FRAME NUMBER ERR (" + _frame_number.error_msg + ");";
+        {
+            program_errors[5] = _frame_number.error;
+            program_errors_str[5] = GetCncErrorMessage(_frame_number.error);
+        }
+        else
+            frame_number = _frame_number.data;
     }
 
     static friend void to_json(nlohmann::json& j, const ProgramData& data)
@@ -157,54 +269,93 @@ struct ProgramData
             {"parts_count", data.parts_count},
             {"tool_number", data.tool_number},
             {"frame_number", data.frame_number},
-            {"prg_err", data.prg_err}
+            {"program_errors", data.program_errors},
+            {"program_errors_str", data.program_errors_str}
         };
     };
 };
 
 struct AxesData
 {
-    int feedrate;
-    int feed_override;
-    float jog_override;
-    int jog_speed;
-    float current_load;
-    float current_load_percent;
-    std::map<std::string, int> servo_loads;
-    std::string axes_err = "";
+    long feedrate = 0;
+    int feed_override = 0;
+    float jog_override = 0;
+    long jog_speed = 0;
+    float current_load = 0;
+    float current_load_percent = 0;
+    std::map<std::string, int> servo_loads = {};
+
+    std::vector<short> axes_errors = std::vector<short>(7);
+    std::vector<std::string> axes_errors_str = std::vector<std::string>(7);
 
     AxesData(unsigned short handle) 
     {
-        int_data _feedrate = GetFeedRate(handle);
-        int_data _feed_override = GetFeedOverride(handle);
-        float_data _jog_override = GetJogOverride(handle);
-        int_data _jog_speed = GetJogSpeed(handle);
+        long_data _feedrate = GetFeedRate(handle);
+        short_data _feed_override = GetFeedOverride(handle);
+        short_data _jog_override = GetJogOverride(handle);
+        long_data _jog_speed = GetJogSpeed(handle);
         float_data _current_load = GetServoCurrentLoad(handle);
         float_data _current_load_percent = GetServoCurrentPercentLoad(handle);
         map_data _servo_loads = GetAllServoLoad(handle);
 
-        feedrate = _feedrate.data;
-        feed_override = _feed_override.data;
-        jog_override = _jog_override.data;
-        jog_speed = _jog_speed.data;
-        current_load = _current_load.data;
-        current_load_percent = _current_load_percent.data;
-        servo_loads = _servo_loads.data;
-
         if (_feedrate.IsError())
-            axes_err += "FEEDRATE ERR (" + _feedrate.error_msg + ");";
+        {
+            axes_errors[0] = _feedrate.error;
+            axes_errors_str[0] = GetCncErrorMessage(_feedrate.error);
+        }
+        else
+            feedrate = _feedrate.data;
+
+
         if (_feed_override.IsError())
-            axes_err += "FOV ERR (" + _feed_override.error_msg + ");";
+        {
+            axes_errors[1] = _feed_override.error;
+            axes_errors_str[1] = GetCncErrorMessage(_feed_override.error);
+        }
+        else
+            feed_override = _feed_override.data;
+
+
         if (_jog_override.IsError())
-            axes_err += "JOV ERR (" + _jog_override.error_msg + ");";
+        {
+            axes_errors[2] = _jog_override.error;
+            axes_errors_str[2] = GetCncErrorMessage(_jog_override.error);
+        }
+        else
+            jog_override = _jog_override.data;
+
+
         if (_jog_speed.IsError())
-            axes_err += "JOG SPEED ERR (" + _jog_speed.error_msg + ");";
+        {
+            axes_errors[3] = _jog_speed.error;
+            axes_errors_str[3] = GetCncErrorMessage(_jog_speed.error);
+        }
+        else
+            jog_speed = _jog_speed.data;
+
         if (_current_load.IsError())
-            axes_err += "CURRENT LOAD ERR (" + _current_load.error_msg + ");";
+        {
+            axes_errors[4] = _current_load.error;
+            axes_errors_str[4] = GetCncErrorMessage(_current_load.error);
+        }
+        else
+            current_load = _current_load.data;
+
         if (_current_load_percent.IsError())
-            axes_err += "CURRENT LOAD % ERR (" + _current_load_percent.error_msg + ");";
+        {
+            axes_errors[5] = _current_load_percent.error;
+            axes_errors_str[5] = GetCncErrorMessage(_current_load_percent.error);
+        }
+        else
+            current_load_percent = _current_load_percent.data;
+
         if (_servo_loads.IsError())
-            axes_err += "SERVO LOAD ERR (" + _servo_loads.error_msg + ");";
+        {
+            axes_errors[6] = _servo_loads.error;
+            axes_errors_str[6] = GetCncErrorMessage(_servo_loads.error);
+        }
+        else
+            servo_loads = _servo_loads.data;
     }
 
     static friend void to_json(nlohmann::json& j, const AxesData& data)
@@ -218,44 +369,70 @@ struct AxesData
             {"current_load", data.current_load},
             {"current_load_percent", data.current_load_percent},
             {"servo_loads", data.servo_loads},
-            {"axes_err", data.axes_err}
+            {"axes_errors", data.axes_errors},
+            {"axes_errors_str", data.axes_errors_str}
         };
     }
 };
 
 struct SpindleData
 {
-    int spindle_speed;
-    int spindle_param_speed;
-    std::map<std::string, int> spindle_motor_speed;
-    std::map<std::string, int> spindle_load;
-    int spindle_override;
-    std::string spindle_err = "";
+    long spindle_speed = 0;
+    long spindle_param_speed = 0;
+    std::map<std::string, int> spindle_motor_speed = {};
+    std::map<std::string, int> spindle_load = {};
+    short spindle_override = 0;
+
+    std::vector<short> spindle_errors = std::vector<short>(5);
+    std::vector<std::string> spindle_errors_str = std::vector<std::string>(5);
 
     SpindleData(unsigned short handle)
     {
-        int_data _spindle_speed = GetSpindleSpeed(handle);
-        int_data _spindle_param_speed = GetSpindleSpeedParam(handle);
+        long_data _spindle_speed = GetSpindleSpeed(handle);
+        long_data _spindle_param_speed = GetSpindleSpeedParam(handle);
         map_data _spindle_motor_speed = GetSpindleMotorSpeed(handle);
         map_data _spindle_load = GetSpindleLoad(handle);
-        int_data _spindle_override = GetSpindleOverride(handle);
-
-        spindle_speed = _spindle_speed.data;
-        spindle_param_speed = _spindle_param_speed.data;
-        spindle_motor_speed = _spindle_motor_speed.data;
-        spindle_load = _spindle_load.data;
-        spindle_override = _spindle_override.data;
+        short_data _spindle_override = GetSpindleOverride(handle);
 
         if (_spindle_speed.IsError())
-            spindle_err += "SP SPEED ERR (" + _spindle_speed.error_msg + ");";
+        {
+            spindle_errors[0] = _spindle_speed.error;
+            spindle_errors_str[0] = GetCncErrorMessage(_spindle_speed.error);
+        }
+        else
+            spindle_speed = _spindle_speed.data;
+
         if (_spindle_param_speed.IsError())
-            spindle_err += "SP SPEED PARAM ERR (" + _spindle_param_speed.error_msg + ");";
+        {
+            spindle_errors[1] = _spindle_param_speed.error;
+            spindle_errors_str[1] = GetCncErrorMessage(_spindle_param_speed.error);
+        }
+        else
+            spindle_param_speed = _spindle_param_speed.data;
+
         if (_spindle_motor_speed.IsError())
-            spindle_err += "MOTOR SPEED ERR (" + _spindle_motor_speed.error_msg + ");";
+        {
+            spindle_errors[2] = _spindle_motor_speed.error;
+            spindle_errors_str[2] = GetCncErrorMessage(_spindle_motor_speed.error);
+        }
+        else
+            spindle_motor_speed = _spindle_motor_speed.data;
+
         if (_spindle_load.IsError())
-            spindle_err += "SP LOADS ERR (" + _spindle_load.error_msg + ");";
+        {
+            spindle_errors[3] = _spindle_load.error;
+            spindle_errors_str[3] = GetCncErrorMessage(_spindle_load.error);
+        }
+        else
+            spindle_load = _spindle_load.data;
+
         if (_spindle_override.IsError())
-            spindle_err += "SOV ERR (" + _spindle_override.error_msg + ");";
+        {
+            spindle_errors[4] = _spindle_override.error;
+            spindle_errors_str[4] = GetCncErrorMessage(_spindle_override.error);
+        }
+        else
+            spindle_override = _spindle_override.data;
     }
 
     static friend void to_json(nlohmann::json& j, const SpindleData& data)
@@ -267,29 +444,48 @@ struct SpindleData
             {"spindle_motor_speed", data.spindle_motor_speed},
             {"spindle_load", data.spindle_load},
             {"spindle_override", data.spindle_override},
-            {"spindle_err", data.spindle_err}
+            {"spindle_errors", data.spindle_errors},
+            {"spindle_errors_str", data.spindle_errors_str}
         };
     }
 };
 
 struct AlarmData
 {
-    std::string emergency;
-    std::string alarm_status;
-    std::string alarm_err = "";
+    short emergency = 0;
+    short alarm_status = 0;
+    std::string emergency_str = "";
+    std::string alarm_status_str = "";
+
+    std::vector<short> alarm_errors = std::vector<short>(2);
+    std::vector<std::string> alarm_errors_str = std::vector<std::string>(2);
 
     AlarmData(unsigned short handle, const std::string& series)
     {
-        str_data _emergency = GetEmergencyStop(handle, series);
-        str_data _alarm_status = GetAlarmStatus(handle, series);
-
-        emergency = _emergency.data;
-        alarm_status = _alarm_status.data;
+        short_data _emergency = GetEmergencyStop(handle, series);
+        short_data _alarm_status = GetAlarmStatus(handle, series);
 
         if (_emergency.IsError())
-            alarm_err += "EMG ERR (" + _emergency.error_msg + ");";
+        {
+            alarm_errors[0] = _emergency.error;
+            alarm_errors_str[0] = GetCncErrorMessage(_emergency.error);
+        }
+        else
+        {
+            emergency = _emergency.data;
+            emergency_str = GetEmergencyString(emergency, series);
+        }
+
         if (_alarm_status.IsError())
-            alarm_err += "ALARM STATUS ERR (" + _alarm_status.error_msg + ");";
+        {
+            alarm_errors[1] = _alarm_status.error;
+            alarm_errors_str[1] = GetCncErrorMessage(_alarm_status.error);
+        }
+        else
+        {
+            alarm_status = _alarm_status.data;
+            alarm_status_str = GetAlarmStatusString(alarm_status, series);
+        }
     }
 
     static friend void to_json(nlohmann::json& j, const AlarmData& data)
@@ -298,7 +494,10 @@ struct AlarmData
         {
             {"emergency", data.emergency},
             {"alarm_status", data.alarm_status},
-            {"alarm_err", data.alarm_err}
+            {"emergency_str", data.emergency_str},
+            {"alarm_status_str", data.alarm_status_str},
+            {"alarm_errors", data.alarm_errors},
+            {"alarm_errors_str", data.alarm_errors_str}
         };
     }
 };
@@ -368,7 +567,7 @@ int main(int argc, char* argv[])
         CollectorData col_data;
         for (const auto& device : devices_array)
         {
-            ushort_data handle = GetHandle(device.address, device.port, 10);
+            ushort_data handle = GetHandle(device.address, device.port, 1);
             col_data.AddCollector(handle.data, device);
             if(!handle.IsError())
                 FreeHandle(handle.data);
