@@ -567,7 +567,7 @@ int main(int argc, char* argv[])
         CollectorData col_data;
         for (const auto& device : devices_array)
         {
-            ushort_data handle = GetHandle(device.address, device.port, 1);
+            ushort_data handle = GetHandle(device.address, device.port, 5);
             col_data.AddCollector(handle.data, device);
             if(!handle.IsError())
                 FreeHandle(handle.data);

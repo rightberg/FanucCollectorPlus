@@ -59,6 +59,18 @@ typedef struct float_data
 	}
 } float_data;
 
+typedef struct double_data
+{
+	double data;
+	short error;
+
+	bool IsError() const
+	{
+		return error != 0;
+	}
+} double_data;
+
+
 typedef struct short_data
 {
 	short  data;

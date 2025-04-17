@@ -1092,3 +1092,23 @@ short_data GetAlarmStatus(unsigned short handle, std::string series)
 }
 
 #pragma endregion
+
+#pragma region Operating data
+//CNC_RDTIMER
+double_data GetPowerOnTime(unsigned short handle, std::string series)
+{
+    double_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        IODBTIME buf = {};
+        short ret = cnc_rdtimer(handle, 0, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.minute + buf.msec / 60000.0;
+    }
+    return res;
+}
+#pragma endregion
