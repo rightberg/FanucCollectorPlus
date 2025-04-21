@@ -1,0 +1,196 @@
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/document.h"
+#include <stdlib.h>
+#include <string.h>
+#include <vector>
+#include "Fanuc.h"
+#include "FanucTypes.h"
+#include "Collector.h"
+
+void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
+{
+    //mode data
+    short_data mode = GetMode(handle);
+    short_data run_state = GetRunState(handle);
+    short_data status = GetStatus(handle);
+    short_data shutdowns = GetShutdowns(handle);
+    short_data hight_speed = GetHightSpeed(handle);
+    short_data axis_motion = GetAxisMotion(handle);
+    short_data mstb = GetMstb(handle);
+    long_data load_excess = GetLoadExcess(handle);
+    //program data
+    str_data frame = GetFrame(handle);
+    short_data main_prog_number = GetMainPrgNumber(handle);
+    short_data sub_prog_number = GetSubPrgNumber(handle);
+    int_data parts_count = GetPartsCount(handle);
+    long_data tool_number = GetToolNumber(handle);
+    long_data frame_number = GetFrameNumber(handle);
+    //axes data
+    long_data feedrate = GetFeedRate(handle);
+    short_data feed_override = GetFeedOverride(handle);
+    short_data jog_override = GetJogOverride(handle);
+    long_data jog_speed = GetJogSpeed(handle);
+    float_data current_load = GetServoCurrentLoad(handle);
+    float_data current_load_percent = GetServoCurrentPercentLoad(handle);
+    map_data servo_loads = GetAllServoLoad(handle);
+    //spindle data
+    long_data spindle_speed = GetSpindleSpeed(handle);
+    long_data spindle_param_speed = GetSpindleSpeedParam(handle);
+    map_data spindle_motor_speed = GetSpindleMotorSpeed(handle);
+    map_data spindle_load = GetSpindleLoad(handle);
+    short_data spindle_override = GetSpindleOverride(handle);
+    //alarm data
+    short_data emergency = GetEmergencyStop(handle);
+    short_data alarm_status = GetAlarmStatus(handle);
+
+    //pull device data
+    data.name = device.name;
+    data.address = device.address;
+    data.port = device.port;
+    data.series = device.series;
+    //pull mode data
+    mode.PullData(data.mode, data.errors[0]);
+    run_state.PullData(data.run_state, data.errors[1]);
+    status.PullData(data.status, data.errors[2]);
+    shutdowns.PullData(data.shutdowns, data.errors[3]);
+    hight_speed.PullData(data.hight_speed, data.errors[4]);
+    axis_motion.PullData(data.axis_motion, data.errors[5]);
+    mstb.PullData(data.mstb, data.errors[6]);
+    load_excess.PullData(data.load_excess, data.errors[7]);
+    //pull program data
+    frame.PullData(data.frame, data.errors[8]);
+    main_prog_number.PullData(data.main_prog_number, data.errors[9]);
+    sub_prog_number.PullData(data.sub_prog_number, data.errors[10]);
+    parts_count.PullData(data.parts_count, data.errors[11]);
+    tool_number.PullData(data.tool_number, data.errors[12]);
+    frame_number.PullData(data.frame_number, data.errors[13]);
+    //pull axes data
+    feedrate.PullData(data.feedrate, data.errors[14]);
+    feed_override.PullData(data.feed_override, data.errors[15]);
+    jog_override.PullData(data.jog_override, data.errors[16]);
+    jog_speed.PullData(data.jog_speed, data.errors[17]);
+    current_load.PullData(data.current_load, data.errors[18]);
+    current_load_percent.PullData(data.current_load_percent, data.errors[19]);
+    servo_loads.PullData(data.servo_loads, data.errors[20]);
+    //pull spindle data
+    spindle_speed.PullData(data.spindle_speed, data.errors[21]);
+    spindle_param_speed.PullData(data.spindle_param_speed, data.errors[22]);
+    spindle_motor_speed.PullData(data.spindle_motor_speed, data.errors[23]);
+    spindle_load.PullData(data.spindle_load, data.errors[24]);
+    spindle_override.PullData(data.spindle_override, data.errors[25]);
+    //pull alarm data
+    emergency.PullData(data.emergency, data.errors[26]);
+    alarm_status.PullData(data.alarm_status, data.errors[27]);
+}
+
+bool ParseDevices(const char* json, std::vector<Device>& devices)
+{
+    rapidjson::Document doc;
+    rapidjson::ParseResult ok = doc.Parse(json);
+
+    if (!ok)
+        return false;
+
+    for (const auto& deviceValue : doc.GetArray()) 
+    {
+        Device device;
+        if (deviceValue.HasMember("name") && deviceValue["name"].IsString()) 
+            device.name = deviceValue["name"].GetString();
+
+        if (deviceValue.HasMember("address") && deviceValue["address"].IsString())
+            device.address = deviceValue["address"].GetString();
+
+        if (deviceValue.HasMember("series") && deviceValue["series"].IsString())
+            device.series = deviceValue["series"].GetString();
+
+        if (deviceValue.HasMember("port") && deviceValue["port"].IsInt())
+            device.port = deviceValue["port"].GetInt();
+
+        devices.push_back(device);
+    }
+    return true;
+}
+
+std::string SerializeFanucData(FanucData& data)
+{
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    writer.StartObject();
+
+    //device data
+    writer.Key("name");    writer.String(data.name.c_str());
+    writer.Key("series");  writer.String(data.series.c_str());
+    writer.Key("address"); writer.String(data.address.c_str());
+    writer.Key("port");    writer.Int(data.port);
+    //mode data 
+    writer.Key("mode");        writer.Int(data.mode);
+    writer.Key("run_state");   writer.Int(data.run_state);
+    writer.Key("status");      writer.Int(data.status);
+    writer.Key("shutdowns");   writer.Int(data.shutdowns);
+    writer.Key("hight_speed"); writer.Int(data.hight_speed);
+    writer.Key("axis_motion"); writer.Int(data.axis_motion);
+    writer.Key("mstb");        writer.Int(data.mstb);
+    writer.Key("load_excess"); writer.Int64(data.load_excess);
+    //program data
+    writer.Key("frame");            writer.String(data.frame.c_str());
+    writer.Key("main_prog_number"); writer.Int(data.main_prog_number);
+    writer.Key("sub_prog_number");  writer.Int(data.sub_prog_number);
+    writer.Key("parts_count");      writer.Int(data.parts_count);
+    writer.Key("tool_number");      writer.Int64(data.tool_number);
+    writer.Key("frame_number");     writer.Int64(data.frame_number);
+    //axes data
+    writer.Key("feedrate");             writer.Int64(data.feedrate);
+    writer.Key("feed_override");        writer.Int(data.feed_override);
+    writer.Key("jog_override");         writer.Int(data.jog_override);
+    writer.Key("jog_speed");            writer.Int64(data.jog_speed);
+    writer.Key("current_load");         writer.Double(data.current_load);
+    writer.Key("current_load_percent"); writer.Double(data.current_load_percent);
+    writer.Key("servo_loads");
+    writer.StartObject();
+    for (const auto& pair : data.servo_loads)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
+    //spindle data
+    writer.Key("spindle_speed");       writer.Int64(data.spindle_speed);
+    writer.Key("spindle_param_speed"); writer.Int64(data.spindle_param_speed);
+    writer.Key("spindle_override");    writer.Int(data.spindle_override);
+    writer.Key("spindle_motor_speed");
+    writer.StartObject();
+    for (const auto& pair : data.spindle_motor_speed)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
+    writer.Key("spindle_load");
+    writer.StartObject();
+    for (const auto& pair : data.spindle_load)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
+    //alarm data
+    writer.Key("emergency");    writer.Int(data.emergency);
+    writer.Key("alarm_status"); writer.Int(data.alarm_status);
+
+    //errors data
+    writer.Key("errors");
+    writer.StartArray();
+    for (auto error : data.errors)
+        writer.Int(error);
+    writer.EndArray();
+
+    writer.Key("errors_str");
+    writer.StartArray();
+    for (const auto& err_str : data.errors_str)
+        writer.String(err_str.c_str());
+    writer.EndArray();
+
+    writer.EndObject();
+    return std::string(s.GetString());
+}

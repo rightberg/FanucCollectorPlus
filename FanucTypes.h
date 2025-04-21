@@ -1,19 +1,37 @@
 #pragma once
 #ifndef FANUC_TYPES_H
-#define FANUC_TYPES_H
+#define FANUC_TYPES_
 #include <string>
-#include <iostream>
 #include <map>
 
 typedef struct void_func
 {
-	std::string error_msg;
+	short error;
 
 	bool IsError() const
 	{
-		return !error_msg.empty();
+		return error != 0;
 	}
 } void_func;
+
+typedef struct bool_data
+{
+	bool data;
+	short error;
+
+	bool IsError() const
+	{
+		return error != 0;
+	}
+
+	void PullData(bool& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
+	}
+} bool_data;
 
 typedef struct str_data
 {
@@ -23,6 +41,14 @@ typedef struct str_data
 	bool IsError() const 
 	{
 		return error != 0;
+	}
+
+	void PullData(std::string& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
 	}
 } str_data;
 
@@ -35,6 +61,14 @@ typedef struct int_data
 	{
 		return error != 0;
 	}
+
+	void PullData(int& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
+	}
 } int_data;
 
 typedef struct long_data
@@ -45,6 +79,14 @@ typedef struct long_data
 	bool IsError() const
 	{
 		return error != 0;
+	}
+
+	void PullData(long& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
 	}
 } long_data;
 
@@ -57,19 +99,15 @@ typedef struct float_data
 	{
 		return error != 0;
 	}
-} float_data;
 
-typedef struct double_data
-{
-	double data;
-	short error;
-
-	bool IsError() const
+	void PullData(float& _data, short& _error) const
 	{
-		return error != 0;
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
 	}
-} double_data;
-
+} float_data;
 
 typedef struct short_data
 {
@@ -79,6 +117,14 @@ typedef struct short_data
 	bool IsError() const
 	{
 		return error != 0;
+	}
+
+	void PullData(short& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
 	}
 } short_data;
 
@@ -91,6 +137,14 @@ typedef struct ushort_data
 	{
 		return error != 0;
 	}
+
+	void PullData(unsigned short& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
+	}
 } ushort_data;
 
 typedef struct map_data
@@ -102,6 +156,13 @@ typedef struct map_data
 	{
 		return error != 0;
 	}
-} map_data;
 
+	void PullData(std::map<std::string, int>& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
+	}
+} map_data;
 #endif

@@ -4,7 +4,7 @@
 #include <string>
 #include "FanucTypes.h"
 
-//sub functions
+//decode functions
 std::string GetCncErrorMessage(int error_code);
 std::string GetModeString(short mode, std::string series);
 std::string GetRunStateString(int state_num, std::string series);
@@ -25,15 +25,14 @@ int GetFeedOverrideValue(short unit);
 ushort_data GetHandle(std::string address, int port, int timeout);
 void_func FreeHandle(unsigned short handle);
 //mode functions
-str_data GetMainPrgName(unsigned short handle);
-short_data GetMode(unsigned short handle, std::string series);
-short_data GetRunState(unsigned short handle, std::string series);
-short_data GetStatus(unsigned short handle, std::string series);
+short_data GetMode(unsigned short handle);
+short_data GetRunState(unsigned short handle);
+short_data GetStatus(unsigned short handle);
 short_data GetShutdowns(unsigned short handle);
 short_data GetHightSpeed(unsigned short handle);
-short_data GetAxisMotion(unsigned short handle, std::string series);
-short_data GetMstb(unsigned short handle, std::string series);
-long_data GetLoadExcess(unsigned short handle, std::string series);
+short_data GetAxisMotion(unsigned short handle);
+short_data GetMstb(unsigned short handle);
+long_data GetLoadExcess(unsigned short handle);
 //program data
 short_data GetMainPrgNumber(unsigned short handle);
 short_data GetSubPrgNumber(unsigned short handle);
@@ -56,6 +55,6 @@ map_data GetSpindleMotorSpeed(unsigned short handle);
 map_data GetSpindleLoad(unsigned short handle);
 short_data GetSpindleOverride(unsigned short handle);
 //alarm data
-short_data GetEmergencyStop(unsigned short handle, std::string series);
-short_data GetAlarmStatus(unsigned short handle, std::string series);
+short_data GetEmergencyStop(unsigned short handle);
+short_data GetAlarmStatus(unsigned short handle);
 #endif
