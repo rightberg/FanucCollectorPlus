@@ -53,9 +53,14 @@ struct FanucData
     //alarm data
     short emergency;
     short alarm_status;
-
-    std::vector<short> errors = std::vector<short>(28);
-    std::vector<std::string> errors_str = std::vector<std::string>(28);
+    //other data
+    long power_on_time;
+    long operating_time;
+    long cutting_time;
+    long cycle_time;
+    //errors data
+    std::vector<short> errors = std::vector<short>(32);
+    std::vector<std::string> errors_str = std::vector<std::string>(32);
 };
 
 //process data

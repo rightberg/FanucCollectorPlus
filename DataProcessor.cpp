@@ -43,6 +43,11 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     //alarm data
     short_data emergency = GetEmergencyStop(handle);
     short_data alarm_status = GetAlarmStatus(handle);
+    //other data
+    long_data power_on_time = GetPowerOnTime(handle);
+    long_data operating_time = GetOperationTime(handle);
+    long_data cutting_time = GetCuttingTime(handle);
+    long_data cycle_time = GetCycleTime(handle);
 
     //pull device data
     data.name = device.name;
@@ -82,6 +87,11 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     //pull alarm data
     emergency.PullData(data.emergency, data.errors[26]);
     alarm_status.PullData(data.alarm_status, data.errors[27]);
+    //pull other data
+    power_on_time.PullData(data.power_on_time, data.errors[28]);
+    operating_time.PullData(data.operating_time, data.errors[29]);
+    cutting_time.PullData(data.cutting_time, data.errors[30]);
+    cycle_time.PullData(data.cycle_time, data.errors[31]);
 }
 
 bool ParseDevices(const char* json, std::vector<Device>& devices)
@@ -177,7 +187,11 @@ std::string SerializeFanucData(FanucData& data)
     //alarm data
     writer.Key("emergency");    writer.Int(data.emergency);
     writer.Key("alarm_status"); writer.Int(data.alarm_status);
-
+    //other data
+    writer.Key("power_on_time");    writer.Int(data.power_on_time);
+    writer.Key("operating_time"); writer.Int(data.operating_time);
+    writer.Key("cutting_time");    writer.Int(data.cutting_time);
+    writer.Key("cycle_time"); writer.Int(data.cycle_time);
     //errors data
     writer.Key("errors");
     writer.StartArray();

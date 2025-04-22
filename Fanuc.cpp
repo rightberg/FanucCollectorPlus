@@ -634,6 +634,98 @@ short_data GetAlarmStatus(unsigned short handle)
 
 #pragma region Operating data
 
+//6757, 6758 - cycle time
+//6751, 6752 - operation time
+//6753, 6754 - cutting time
+//6750 - power on time
 
+long_data GetPowerOnTime(unsigned short handle)
+{
+    long_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        IODBPSD buf;
+        short ret = cnc_rdparam(handle, 6750, -1, sizeof(buf), &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.u.rdata.prm_val;
+    }
+    return res;
+}
+
+long_data GetOperationTime(unsigned short handle)
+{
+    long_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        IODBPSD buf_1;
+        short ret = cnc_rdparam(handle, 6751, -1, sizeof(buf_1), &buf_1);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+        {
+            IODBPSD buf_2;
+            ret = cnc_rdparam(handle, 6752, -1, sizeof(buf_2), &buf_2);
+            if (ret != EW_OK)
+                res.error = ret;
+            else
+                res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
+        }
+    }
+    return res;
+}
+
+long_data GetCuttingTime(unsigned short handle)
+{
+    long_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        IODBPSD buf_1;
+        short ret = cnc_rdparam(handle, 6753, -1, sizeof(buf_1), &buf_1);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+        {
+            IODBPSD buf_2;
+            ret = cnc_rdparam(handle, 6754, -1, sizeof(buf_2), &buf_2);
+            if (ret != EW_OK)
+                res.error = ret;
+            else
+                res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
+        }
+    }
+    return res;
+}
+
+long_data GetCycleTime(unsigned short handle)
+{
+    long_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        IODBPSD buf_1;
+        short ret = cnc_rdparam(handle, 6757, -1, sizeof(buf_1), &buf_1);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+        {
+            IODBPSD buf_2;
+            ret = cnc_rdparam(handle, 6758, -1, sizeof(buf_2), &buf_2);
+            if (ret != EW_OK)
+                res.error = ret;
+            else
+                res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
+        }
+    }
+    return res;
+}
 
 #pragma endregion

@@ -57,4 +57,9 @@ short_data GetSpindleOverride(unsigned short handle);
 //alarm data
 short_data GetEmergencyStop(unsigned short handle);
 short_data GetAlarmStatus(unsigned short handle);
+//other data
+long_data GetPowerOnTime(unsigned short handle);
+long_data GetOperationTime(unsigned short handle);
+long_data GetCuttingTime(unsigned short handle);
+long_data GetCycleTime(unsigned short handle);
 #endif
