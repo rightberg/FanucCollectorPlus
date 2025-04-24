@@ -11,12 +11,12 @@
 void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
 {
     //mode data
-    short_data mode = GetMode(handle);
-    short_data run_state = GetRunState(handle);
-    short_data status = GetStatus(handle);
+    short_data aut = GetMode(handle);
+    short_data run = GetRunState(handle);
+    short_data edit = GetStatus(handle);
     short_data shutdowns = GetShutdowns(handle);
     short_data hight_speed = GetHightSpeed(handle);
-    short_data axis_motion = GetAxisMotion(handle);
+    short_data motion = GetAxisMotion(handle);
     short_data mstb = GetMstb(handle);
     long_data load_excess = GetLoadExcess(handle);
     //program data
@@ -42,10 +42,10 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     short_data spindle_override = GetSpindleOverride(handle);
     //alarm data
     short_data emergency = GetEmergencyStop(handle);
-    short_data alarm_status = GetAlarmStatus(handle);
+    short_data alarm = GetAlarmStatus(handle);
     //other data
     long_data power_on_time = GetPowerOnTime(handle);
-    long_data operating_time = GetOperationTime(handle);
+    long_data operation_time = GetOperationTime(handle);
     long_data cutting_time = GetCuttingTime(handle);
     long_data cycle_time = GetCycleTime(handle);
 
@@ -55,12 +55,12 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     data.port = device.port;
     data.series = device.series;
     //pull mode data
-    mode.PullData(data.mode, data.errors[0]);
-    run_state.PullData(data.run_state, data.errors[1]);
-    status.PullData(data.status, data.errors[2]);
+    aut.PullData(data.aut, data.errors[0]);
+    run.PullData(data.run, data.errors[1]);
+    edit.PullData(data.edit, data.errors[2]);
     shutdowns.PullData(data.shutdowns, data.errors[3]);
     hight_speed.PullData(data.hight_speed, data.errors[4]);
-    axis_motion.PullData(data.axis_motion, data.errors[5]);
+    motion.PullData(data.motion, data.errors[5]);
     mstb.PullData(data.mstb, data.errors[6]);
     load_excess.PullData(data.load_excess, data.errors[7]);
     //pull program data
@@ -86,12 +86,18 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     spindle_override.PullData(data.spindle_override, data.errors[25]);
     //pull alarm data
     emergency.PullData(data.emergency, data.errors[26]);
-    alarm_status.PullData(data.alarm_status, data.errors[27]);
+    alarm.PullData(data.alarm, data.errors[27]);
     //pull other data
     power_on_time.PullData(data.power_on_time, data.errors[28]);
-    operating_time.PullData(data.operating_time, data.errors[29]);
+    operation_time.PullData(data.operation_time, data.errors[29]);
     cutting_time.PullData(data.cutting_time, data.errors[30]);
     cycle_time.PullData(data.cycle_time, data.errors[31]);
+
+    for (int i = 0; i < data.errors.size(); i++)
+    {
+        if(data.errors[i]!= 0)
+            data.errors_str[i] = GetCncErrorMessage(data.errors[i]);
+    }
 }
 
 bool ParseDevices(const char* json, std::vector<Device>& devices)
@@ -134,12 +140,12 @@ std::string SerializeFanucData(FanucData& data)
     writer.Key("address"); writer.String(data.address.c_str());
     writer.Key("port");    writer.Int(data.port);
     //mode data 
-    writer.Key("mode");        writer.Int(data.mode);
-    writer.Key("run_state");   writer.Int(data.run_state);
-    writer.Key("status");      writer.Int(data.status);
+    writer.Key("aut");        writer.Int(data.aut);
+    writer.Key("run");   writer.Int(data.run);
+    writer.Key("edit");      writer.Int(data.edit);
     writer.Key("shutdowns");   writer.Int(data.shutdowns);
     writer.Key("hight_speed"); writer.Int(data.hight_speed);
-    writer.Key("axis_motion"); writer.Int(data.axis_motion);
+    writer.Key("motion"); writer.Int(data.motion);
     writer.Key("mstb");        writer.Int(data.mstb);
     writer.Key("load_excess"); writer.Int64(data.load_excess);
     //program data
@@ -186,10 +192,10 @@ std::string SerializeFanucData(FanucData& data)
     writer.EndObject();
     //alarm data
     writer.Key("emergency");    writer.Int(data.emergency);
-    writer.Key("alarm_status"); writer.Int(data.alarm_status);
+    writer.Key("alarm"); writer.Int(data.alarm);
     //other data
     writer.Key("power_on_time");    writer.Int(data.power_on_time);
-    writer.Key("operating_time"); writer.Int(data.operating_time);
+    writer.Key("operation_time"); writer.Int(data.operation_time);
     writer.Key("cutting_time");    writer.Int(data.cutting_time);
     writer.Key("cycle_time"); writer.Int(data.cycle_time);
     //errors data

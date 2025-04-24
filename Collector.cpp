@@ -1,4 +1,4 @@
-﻿#pragma warning(disable: 4996)
+#pragma warning(disable: 4996)
 #pragma comment(lib, "focas/fwlib32.lib")
 #include <stdio.h>
 #include <stdint.h>
@@ -7,30 +7,21 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <atomic>
 #include "focas/fwlib32.h"
 #include "Fanuc.h"
 #include "Collector.h"
+#include "Support.h"
 #define _CRT_SECURE_NO_WARNINGS
 
-std::atomic_bool running{ true };
-
-static BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
-{
-    switch (input_type)
-    {
-        case CTRL_C_EVENT:
-        case CTRL_BREAK_EVENT:
-        case CTRL_CLOSE_EVENT:
-        case CTRL_LOGOFF_EVENT:
-        case CTRL_SHUTDOWN_EVENT:
-            running = false;
-            return TRUE;
-        default:
-            return FALSE;
-    }
-}
 std::vector<Device> devices = {};
+std::vector<unsigned short> handles = {};
+
+static void FreeReceivedHandles()
+{
+    int h_count = handles.size();
+    for (int i = 0; i < h_count; i++)
+        FreeHandle(handles[i]);
+}
 
 int main(int argc, char* argv[])
 {
@@ -39,30 +30,67 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        std::cerr << "Usage: " << argv[0] << " <json_string>" << std::endl;
+        std::string message = std::string("Ожидается <json_string>\n");
+        std::cerr << message;
+        CreateCrashLog(message);
         return 1;
     }
 
     try
     {
         std::string json_string = argv[1];
-        bool error = ParseDevices(json_string.c_str(), devices);
-        if (!error)
+        if (!ParseDevices(json_string.c_str(), devices))
         {
-            std::cerr << "Ошибка парсинга devices" << std::endl;
+            std::string message = std::string("Ошибка парсинга devices\n");
+            std::cerr << message;
+            CreateCrashLog(message);
             return 2;
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::string message = std::string("Ошибка парсинга (аргумент)\n");
+        std::cerr << message;
+        CreateCrashLog(message);
         return 3;
     }
 
-    if (!SetConsoleCtrlHandler(ConsoleHandlerRoutine, TRUE))
+    if (argc >= 3) 
     {
-        std::cerr << "Не удалось установить обработчик консольных событий." << std::endl;
+        if (!TryGetPID(argv[2]))
+        {
+            std::string message = std::string("Некорректный PID: ") + argv[2] + "\n";
+            std::cerr << message;
+            CreateCrashLog(message);
+            return 3;
+        }
+    }
+
+    if (!SetSignalHandler())
+    {
+        std::string message = "Не удалось установить обработчик консольных событий\n";
+        std::cerr << message;
+        CreateCrashLog(message);
         return 4;
+    }
+
+    int device_count = devices.size();
+    try
+    {
+        handles = std::vector<unsigned short>(device_count);
+        for (int i = 0; i < device_count; i++)
+        {
+            ushort_data handle = GetHandle(devices[i].address, devices[i].port, 5);
+            if(!handle.IsError())
+                handles[i] = handle.data;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::string message = std::string("Ошибка получения handles: ") + e.what();
+        std::cerr << message;
+        CreateCrashLog(message);
+        return 5;
     }
 
     while(running && !std::cin.eof())
@@ -70,22 +98,22 @@ int main(int argc, char* argv[])
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         try
         {
-            for (const auto& device : devices)
+            for (int i = 0; i < device_count; i++)
             {
-                ushort_data handle = GetHandle(device.address, device.port, 1);
                 FanucData collector = {};
-                SetFanucData(handle.data, device, collector);
-                if (!handle.IsError())
-                    FreeHandle(handle.data);
+                SetFanucData(handles[i], devices[i], collector);
                 std::string serialized_data = SerializeFanucData(collector);
                 std::cout << serialized_data << std::endl;
             }
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Error: " << e.what() << std::endl;
-            return 5;
+            std::string message = std::string("Ошибка работы с данными: ") + e.what();
+            std::cerr << message;
+            CreateCrashLog(message);
+            return 6;
         }
     }
+    FreeReceivedHandles();
     return 0;
 }

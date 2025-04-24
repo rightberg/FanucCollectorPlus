@@ -24,9 +24,14 @@ ushort_data GetHandle(std::string address, int port, int timeout)
 void_func FreeHandle(unsigned short handle)
 {
     void_func res = {};
-    short ret = cnc_freelibhndl(handle);
-    if (ret != EW_OK)
-        res.error = ret;
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        short ret = cnc_freelibhndl(handle);
+        if (ret != EW_OK)
+            res.error = ret;
+    }
     return res;
 }
 
@@ -433,21 +438,21 @@ float_data GetServoCurrentLoad(unsigned short handle)
             if (ret != EW_OK)
             {
                 res.error = ret;
-                return res;
             }
             else
             {
                 long prm = n.u.rdata.prm_val;
                 long dec = n.u.rdata.dec_val;
 
-                if (dec > 0)
-                {
-                    float value = prm * std::pow(10, -dec);
-                    res.data = parameter.data * value / 6554;
-                }
+                //if (dec > 0)
+                //{
+                //    float value = prm * std::pow(10, -dec);
+                //    res.data = parameter.data * value / 6554;
+                //}
+                float value = prm * std::pow(10, -dec);
+                res.data = parameter.data * value / 6554;
             }
         }
-
     }
     return res;
 }
@@ -461,25 +466,30 @@ float_data GetServoCurrentPercentLoad(unsigned short handle)
         res.error = -8;
     float_data current_data = GetServoCurrentLoad(handle);
     if (current_data.IsError())
+    {
         res.error = current_data.error;
+    }
     else
     {
-        IODBPSD max = {};
+        IODBPSD max;
         short ret = cnc_rdparam(handle, 2165, -1, sizeof(max), &max);
         if (ret != EW_OK)
         {
             res.error = ret;
-            return res;
         }
         else
         {
             long prm = max.u.rdata.prm_val;
             long dec = max.u.rdata.dec_val;
-            if (dec > 0)
-            {
-                float value = prm * std::pow(10, -dec);
+            //if (dec > 0)
+            //{
+            //    float value = prm * std::pow(10, -dec);
+            //    res.data = (current_data.data / value) * 100;
+
+            //}
+            float value = prm * std::pow(10, -dec);
+            if (value > 0)
                 res.data = (current_data.data / value) * 100;
-            }
         }
     }
     return res;

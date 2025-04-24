@@ -21,12 +21,12 @@ struct FanucData
     std::string series;
     int port;
     //mode data
-    short mode;
-    short run_state;
-    short status;
+    short aut;
+    short run;
+    short edit;
     short shutdowns;
     short hight_speed;
-    short axis_motion;
+    short motion;
     short mstb;
     long load_excess;
     //program data
@@ -52,10 +52,10 @@ struct FanucData
     std::map<std::string, int> spindle_load;
     //alarm data
     short emergency;
-    short alarm_status;
+    short alarm;
     //other data
     long power_on_time;
-    long operating_time;
+    long operation_time;
     long cutting_time;
     long cycle_time;
     //errors data
