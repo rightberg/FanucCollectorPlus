@@ -103,12 +103,7 @@ int main(int argc, char* argv[])
             for (int i = 0; i < device_count; i++)
             {
                 FanucData collector = {};
-                if (SetFanucData(handles[i], devices[i], collector))
-                {
-                    std::string serialized_data = SerializeFanucData(collector);
-                    std::cout << serialized_data << std::endl;
-                }
-                else
+                if (!SetFanucData(handles[i], devices[i], collector))
                 {
                     errors_counter[i]++;
                     if (errors_counter[i] == max_errors)
@@ -119,6 +114,8 @@ int main(int argc, char* argv[])
                         handles[i] = handle.data;
                     }
                 }
+                std::string serialized_data = SerializeFanucData(collector);
+                std::cout << serialized_data << std::endl;
             }
         }
         catch (const std::exception& e)
