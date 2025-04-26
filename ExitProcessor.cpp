@@ -6,7 +6,7 @@
 
 std::atomic_bool running{ true };
 
-static BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
+BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
 {
     switch (input_type)
     {

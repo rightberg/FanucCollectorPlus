@@ -44,6 +44,9 @@ struct FanucData
     float current_load;
     float current_load_percent;
     std::map<std::string, int> servo_loads;
+    std::map<std::string, long> absolute_positions;
+    std::map<std::string, long> machine_positions;
+    std::map<std::string, long> relative_positions;
     //spindle data
     short spindle_override;
     long spindle_speed;
@@ -58,13 +61,15 @@ struct FanucData
     long operation_time;
     long cutting_time;
     long cycle_time;
+    std::string series_number;
+    std::string version_number;
     //errors data
-    std::vector<short> errors = std::vector<short>(32);
-    std::vector<std::string> errors_str = std::vector<std::string>(32);
+    std::vector<short> errors = std::vector<short>(37);
+    std::vector<std::string> errors_str = std::vector<std::string>(37);
 };
 
 //process data
-void SetFanucData(unsigned short handle, const Device& device, FanucData& data);
+bool SetFanucData(unsigned short handle, const Device& device, FanucData& data);
 bool ParseDevices(const char* json, std::vector<Device>& devices);
 std::string SerializeFanucData(FanucData& data);
 #endif

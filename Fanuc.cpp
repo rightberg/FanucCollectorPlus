@@ -308,6 +308,78 @@ long_data GetFrameNumber(unsigned short handle)
 
 #pragma region Axis data
 
+long_map_data GetAbsolutePositions(unsigned short handle)
+{
+    long_map_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBPOS pos[MAX_AXIS];
+        short num = MAX_AXIS;
+        short ret = cnc_rdposition(handle, 0, &num, pos);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+        {
+            for (int i = 0; i < num; i++)
+            {
+                std::string name(1, pos[i].abs.name);
+                res.data[name] = pos[i].abs.data;
+            }
+        }
+    }
+    return res;
+}
+
+long_map_data GetMachinePositions(unsigned short handle)
+{
+    long_map_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBPOS pos[MAX_AXIS];
+        short num = MAX_AXIS;
+        short ret = cnc_rdposition(handle, 1, &num, pos);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+        {
+            for (int i = 0; i < num; i++)
+            {
+                std::string name(1, pos[i].mach.name);
+                res.data[name] = pos[i].mach.data;
+            }
+        }
+    }
+    return res;
+}
+
+long_map_data GetRelativePositions(unsigned short handle)
+{
+    long_map_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBPOS pos[MAX_AXIS];
+        short num = MAX_AXIS;
+        short ret = cnc_rdposition(handle, 2, &num, pos);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+        {
+            for (int i = 0; i < num; i++)
+            {
+                std::string name(1, pos[i].rel.name);
+                res.data[name] = pos[i].rel.data;
+            }
+        }
+    }
+    return res;   
+}
+
 long_data GetFeedRate(unsigned short handle)
 {
     long_data res = {};
@@ -575,7 +647,7 @@ map_data GetSpindleLoad(unsigned short handle)
         {
             for (int i = 0; i < num; i++)
             {
-                std::string name = std::string(1, buf[i].spload.name);
+                std::string name(1, buf[i].spload.name);
                 int value = buf[i].spload.data;
                 res.data[name] = value;
             }
@@ -734,6 +806,40 @@ long_data GetCycleTime(unsigned short handle)
             else
                 res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
         }
+    }
+    return res;
+}
+
+str_data GetSeriesNumber(unsigned short handle)
+{
+    str_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBSYS buf;
+        short ret = cnc_sysinfo(handle, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.series;
+    }
+    return res;
+}
+
+str_data GetVersionNumber(unsigned short handle)
+{
+    str_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBSYS buf;
+        short ret = cnc_sysinfo(handle, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.version;
     }
     return res;
 }

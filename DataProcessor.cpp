@@ -8,7 +8,7 @@
 #include "FanucTypes.h"
 #include "Collector.h"
 
-void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
+bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
 {
     //mode data
     short_data aut = GetMode(handle);
@@ -34,6 +34,9 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     float_data current_load = GetServoCurrentLoad(handle);
     float_data current_load_percent = GetServoCurrentPercentLoad(handle);
     map_data servo_loads = GetAllServoLoad(handle);
+    long_map_data absolute_positions = GetAbsolutePositions(handle);
+    long_map_data machine_positions = GetMachinePositions(handle);
+    long_map_data relative_positions = GetRelativePositions(handle);
     //spindle data
     long_data spindle_speed = GetSpindleSpeed(handle);
     long_data spindle_param_speed = GetSpindleSpeedParam(handle);
@@ -48,6 +51,8 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     long_data operation_time = GetOperationTime(handle);
     long_data cutting_time = GetCuttingTime(handle);
     long_data cycle_time = GetCycleTime(handle);
+    str_data series_number = GetSeriesNumber(handle);
+    str_data version_number = GetVersionNumber(handle);
 
     //pull device data
     data.name = device.name;
@@ -78,26 +83,43 @@ void SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     current_load.PullData(data.current_load, data.errors[18]);
     current_load_percent.PullData(data.current_load_percent, data.errors[19]);
     servo_loads.PullData(data.servo_loads, data.errors[20]);
+    ///
+    absolute_positions.PullData(data.absolute_positions, data.errors[21]);
+    machine_positions.PullData(data.machine_positions, data.errors[22]);
+    relative_positions.PullData(data.relative_positions, data.errors[23]);
     //pull spindle data
-    spindle_speed.PullData(data.spindle_speed, data.errors[21]);
-    spindle_param_speed.PullData(data.spindle_param_speed, data.errors[22]);
-    spindle_motor_speed.PullData(data.spindle_motor_speed, data.errors[23]);
-    spindle_load.PullData(data.spindle_load, data.errors[24]);
-    spindle_override.PullData(data.spindle_override, data.errors[25]);
+    spindle_speed.PullData(data.spindle_speed, data.errors[24]);
+    spindle_param_speed.PullData(data.spindle_param_speed, data.errors[25]);
+    spindle_motor_speed.PullData(data.spindle_motor_speed, data.errors[26]);
+    spindle_load.PullData(data.spindle_load, data.errors[27]);
+    spindle_override.PullData(data.spindle_override, data.errors[28]);
     //pull alarm data
-    emergency.PullData(data.emergency, data.errors[26]);
-    alarm.PullData(data.alarm, data.errors[27]);
+    emergency.PullData(data.emergency, data.errors[29]);
+    alarm.PullData(data.alarm, data.errors[30]);
     //pull other data
-    power_on_time.PullData(data.power_on_time, data.errors[28]);
-    operation_time.PullData(data.operation_time, data.errors[29]);
-    cutting_time.PullData(data.cutting_time, data.errors[30]);
-    cycle_time.PullData(data.cycle_time, data.errors[31]);
+    power_on_time.PullData(data.power_on_time, data.errors[31]);
+    operation_time.PullData(data.operation_time, data.errors[32]);
+    cutting_time.PullData(data.cutting_time, data.errors[33]);
+    cycle_time.PullData(data.cycle_time, data.errors[34]);
+    series_number.PullData(data.series_number, data.errors[35]);
+    version_number.PullData(data.version_number, data.errors[36]);
 
-    for (int i = 0; i < data.errors.size(); i++)
+    int equal_counter = 0;
+    short first_error = data.errors[0];
+    int max_errors = data.errors.size();
+    for (int i = 0; i < max_errors; i++)
     {
-        if(data.errors[i]!= 0)
+        if (data.errors[i] != 0)
+        {
             data.errors_str[i] = GetCncErrorMessage(data.errors[i]);
+            if (first_error == data.errors[i])
+                equal_counter++;
+        }
     }
+    if (equal_counter == max_errors)
+        return false;
+    else
+        return true;
 }
 
 bool ParseDevices(const char* json, std::vector<Device>& devices)
@@ -170,6 +192,30 @@ std::string SerializeFanucData(FanucData& data)
         writer.Int(pair.second);
     }
     writer.EndObject();
+    writer.Key("absolute_positions");
+    writer.StartObject();
+    for (const auto& pair : data.absolute_positions)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
+    writer.Key("machine_positions");
+    writer.StartObject();
+    for (const auto& pair : data.machine_positions)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
+    writer.Key("relative_positions");
+    writer.StartObject();
+    for (const auto& pair : data.relative_positions)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
     //spindle data
     writer.Key("spindle_speed");       writer.Int64(data.spindle_speed);
     writer.Key("spindle_param_speed"); writer.Int64(data.spindle_param_speed);
@@ -198,6 +244,8 @@ std::string SerializeFanucData(FanucData& data)
     writer.Key("operation_time"); writer.Int(data.operation_time);
     writer.Key("cutting_time");    writer.Int(data.cutting_time);
     writer.Key("cycle_time"); writer.Int(data.cycle_time);
+    writer.Key("series_number"); writer.String(data.series_number.c_str());
+    writer.Key("version_number"); writer.String(data.version_number.c_str());
     //errors data
     writer.Key("errors");
     writer.StartArray();

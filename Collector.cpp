@@ -15,6 +15,8 @@
 
 std::vector<Device> devices = {};
 std::vector<unsigned short> handles = {};
+std::vector<int> errors_counter = {};
+int max_errors = 10;
 
 static void FreeReceivedHandles()
 {
@@ -78,11 +80,11 @@ int main(int argc, char* argv[])
     try
     {
         handles = std::vector<unsigned short>(device_count);
+        errors_counter = std::vector<int>(device_count);
         for (int i = 0; i < device_count; i++)
         {
             ushort_data handle = GetHandle(devices[i].address, devices[i].port, 5);
-            if(!handle.IsError())
-                handles[i] = handle.data;
+            handles[i] = handle.data;
         }
     }
     catch (const std::exception& e)
@@ -101,9 +103,22 @@ int main(int argc, char* argv[])
             for (int i = 0; i < device_count; i++)
             {
                 FanucData collector = {};
-                SetFanucData(handles[i], devices[i], collector);
-                std::string serialized_data = SerializeFanucData(collector);
-                std::cout << serialized_data << std::endl;
+                if (SetFanucData(handles[i], devices[i], collector))
+                {
+                    std::string serialized_data = SerializeFanucData(collector);
+                    std::cout << serialized_data << std::endl;
+                }
+                else
+                {
+                    errors_counter[i]++;
+                    if (errors_counter[i] == max_errors)
+                    {
+                        errors_counter[i] = 0;
+                        FreeHandle(handles[i]);
+                        ushort_data handle = GetHandle(devices[i].address, devices[i].port, 5);
+                        handles[i] = handle.data;
+                    }
+                }
             }
         }
         catch (const std::exception& e)

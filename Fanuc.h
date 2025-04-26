@@ -48,6 +48,9 @@ long_data GetJogSpeed(unsigned short handle);
 float_data GetServoCurrentLoad(unsigned short handle);
 float_data GetServoCurrentPercentLoad(unsigned short handle);
 map_data GetAllServoLoad(unsigned short handle);
+long_map_data GetAbsolutePositions(unsigned short handle);
+long_map_data GetMachinePositions(unsigned short handle);
+long_map_data GetRelativePositions(unsigned short handle);
 //spindle data
 long_data GetSpindleSpeed(unsigned short handle);
 long_data GetSpindleSpeedParam(unsigned short handle);
@@ -62,4 +65,6 @@ long_data GetPowerOnTime(unsigned short handle);
 long_data GetOperationTime(unsigned short handle);
 long_data GetCuttingTime(unsigned short handle);
 long_data GetCycleTime(unsigned short handle);
+str_data GetSeriesNumber(unsigned short handle);
+str_data GetVersionNumber(unsigned short handle);
 #endif
