@@ -516,11 +516,6 @@ float_data GetServoCurrentLoad(unsigned short handle)
                 long prm = n.u.rdata.prm_val;
                 long dec = n.u.rdata.dec_val;
 
-                //if (dec > 0)
-                //{
-                //    float value = prm * std::pow(10, -dec);
-                //    res.data = parameter.data * value / 6554;
-                //}
                 float value = prm * std::pow(10, -dec);
                 res.data = parameter.data * value / 6554;
             }
@@ -553,12 +548,7 @@ float_data GetServoCurrentPercentLoad(unsigned short handle)
         {
             long prm = max.u.rdata.prm_val;
             long dec = max.u.rdata.dec_val;
-            //if (dec > 0)
-            //{
-            //    float value = prm * std::pow(10, -dec);
-            //    res.data = (current_data.data / value) * 100;
 
-            //}
             float value = prm * std::pow(10, -dec);
             if (value > 0)
                 res.data = (current_data.data / value) * 100;
@@ -715,11 +705,6 @@ short_data GetAlarmStatus(unsigned short handle)
 #pragma endregion
 
 #pragma region Operating data
-
-//6757, 6758 - cycle time
-//6751, 6752 - operation time
-//6753, 6754 - cutting time
-//6750 - power on time
 
 long_data GetPowerOnTime(unsigned short handle)
 {

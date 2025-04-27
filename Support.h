@@ -5,6 +5,7 @@
 #include <atomic>
 
 extern std::atomic_bool running;
+extern std::atomic_bool exit_flag;
 // debug functions
 bool CreateCrashLog(const std::string& message);
 // exit functions

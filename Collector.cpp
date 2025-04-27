@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
         return 5;
     }
 
-    while(running && !std::cin.eof())
+    while(running)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         try
@@ -127,5 +127,6 @@ int main(int argc, char* argv[])
         }
     }
     FreeReceivedHandles();
+    exit_flag = true;
     return 0;
 }

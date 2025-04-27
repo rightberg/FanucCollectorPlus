@@ -13,7 +13,7 @@ bool CreateCrashLog(const std::string& message)
     {
         std::filesystem::path path_exe(exe_path);
         std::filesystem::path dir_path = path_exe.parent_path();
-        std::filesystem::path log_path = dir_path / "collector.log";
+        std::filesystem::path log_path = dir_path / "crash_collector.log";
         std::ofstream logfile(log_path);
         if (!logfile.is_open()) 
         {

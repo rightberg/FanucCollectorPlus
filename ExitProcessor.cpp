@@ -5,6 +5,7 @@
 #include <thread>
 
 std::atomic_bool running{ true };
+std::atomic_bool exit_flag{ false };
 
 BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
 {
@@ -16,6 +17,8 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
             running = false;
+            while(!exit_flag)
+                Sleep(100);
             return TRUE;
         default:
             return FALSE;
@@ -42,10 +45,12 @@ static void WaitForParentShutdown(DWORD parent_pid)
 
     DWORD wait_result = WaitForSingleObject(parent_handle, INFINITE);
     if (wait_result == WAIT_OBJECT_0)
+    {
         std::cout << "Обнаружено завершение родительского процесса. Инициирую graceful shutdown." << std::endl;
+        running = false;
+    }
     else
         std::cerr << "Ошибка ожидания завершения родителя, код: " << wait_result << std::endl;
-    running = false;
     CloseHandle(parent_handle);
 }
 
