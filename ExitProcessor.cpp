@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include "Collector.h"
+#include "Support.h"
 
 std::atomic_bool running{ true };
 std::atomic_bool exit_flag{ false };
@@ -27,6 +28,7 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
                 time_couter += delay_ms;
                 if (time_couter >= max_counter)
                 {
+                    CreateCrashLog("Экстренное освобождение handles");
                     FreeAllHandles();
                     break;
                 }
