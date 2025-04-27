@@ -11,6 +11,7 @@ struct Device
     std::string address;
     std::string series;
     int port;
+    int delay_ms;
 };
 
 struct FanucData
@@ -50,7 +51,7 @@ struct FanucData
     //spindle data
     short spindle_override;
     long spindle_speed;
-    long spindle_param_speed;
+    int spindle_param_speed;
     std::map<std::string, int> spindle_motor_speed;
     std::map<std::string, int> spindle_load;
     //alarm data
@@ -65,11 +66,11 @@ struct FanucData
     std::string version_number;
     //errors data
     std::vector<short> errors = std::vector<short>(37);
-    std::vector<std::string> errors_str = std::vector<std::string>(37);
 };
 
 //process data
 bool SetFanucData(unsigned short handle, const Device& device, FanucData& data);
 bool ParseDevices(const char* json, std::vector<Device>& devices);
 std::string SerializeFanucData(FanucData& data);
+void FreeAllHandles();
 #endif

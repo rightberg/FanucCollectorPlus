@@ -7,22 +7,57 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <atomic>
+#include <mutex>
 #include "focas/fwlib32.h"
 #include "Fanuc.h"
 #include "Collector.h"
 #include "Support.h"
 #define _CRT_SECURE_NO_WARNINGS
 
+std::mutex cout_mutex;
 std::vector<Device> devices = {};
 std::vector<unsigned short> handles = {};
-std::vector<int> errors_counter = {};
 int max_errors = 10;
+int min_delay_ms = 50;
+int  handle_timeout = 10;
 
-static void FreeReceivedHandles()
+void FreeAllHandles()
 {
-    int h_count = handles.size();
-    for (int i = 0; i < h_count; i++)
+    int max_handles = handles.size();
+    for (int i = 0; i < max_handles; i++)
         FreeHandle(handles[i]);
+}
+
+void CollectDataThread(Device device, unsigned short& handle, std::atomic_bool& running_flag)
+{
+    int delay_ms = device.delay_ms;
+    if (delay_ms < min_delay_ms)
+        delay_ms = min_delay_ms;
+    handle = GetHandle(device.address, device.port, handle_timeout).data;
+    int errors_counter = 0;
+    while (running_flag)
+    {
+        FanucData collector = {};
+        if (!SetFanucData(handle, device, collector))
+        {
+            errors_counter++;
+            if (errors_counter == max_errors)
+            {
+                errors_counter = 0;
+                FreeHandle(handle);
+                handle = GetHandle(device.address, device.port, handle_timeout).data;
+            }
+        }
+        std::string serialized_data = SerializeFanucData(collector);
+        {  
+            std::lock_guard<std::mutex> lock(cout_mutex);
+            std::cout << serialized_data << std::endl;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
+    }
+    FreeHandle(handle);
 }
 
 int main(int argc, char* argv[])
@@ -68,6 +103,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (argc >= 4)
+    {
+        std::string arg = argv[3];
+        int number = std::stoi(arg);
+        if (number >= 1)
+            handle_timeout = number;
+    }
+
     if (!SetSignalHandler())
     {
         std::string message = "Не удалось установить обработчик консольных событий\n";
@@ -76,57 +119,18 @@ int main(int argc, char* argv[])
         return 4;
     }
 
+    std::vector<std::thread> threads;
     int device_count = devices.size();
-    try
-    {
-        handles = std::vector<unsigned short>(device_count);
-        errors_counter = std::vector<int>(device_count);
-        for (int i = 0; i < device_count; i++)
-        {
-            ushort_data handle = GetHandle(devices[i].address, devices[i].port, 5);
-            handles[i] = handle.data;
-        }
-    }
-    catch (const std::exception& e)
-    {
-        std::string message = std::string("Ошибка получения handles: ") + e.what();
-        std::cerr << message;
-        CreateCrashLog(message);
-        return 5;
-    }
-
-    while(running)
+    handles = std::vector<unsigned short>(device_count);
+    for (int i = 0; i < device_count; i++)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        try
-        {
-            for (int i = 0; i < device_count; i++)
-            {
-                FanucData collector = {};
-                if (!SetFanucData(handles[i], devices[i], collector))
-                {
-                    errors_counter[i]++;
-                    if (errors_counter[i] == max_errors)
-                    {
-                        errors_counter[i] = 0;
-                        FreeHandle(handles[i]);
-                        ushort_data handle = GetHandle(devices[i].address, devices[i].port, 5);
-                        handles[i] = handle.data;
-                    }
-                }
-                std::string serialized_data = SerializeFanucData(collector);
-                std::cout << serialized_data << std::endl;
-            }
-        }
-        catch (const std::exception& e)
-        {
-            std::string message = std::string("Ошибка работы с данными: ") + e.what();
-            std::cerr << message;
-            CreateCrashLog(message);
-            return 6;
-        }
+        threads.emplace_back(CollectDataThread, devices[i], std::ref(handles[i]), std::ref(running));
     }
-    FreeReceivedHandles();
+
+    for (auto& thread : threads) 
+        thread.join();
+
     exit_flag = true;
     return 0;
 }

@@ -460,7 +460,6 @@ long_data GetJogSpeed(unsigned short handle)
                     return res;
                 }
             }
-            //res.error_msg = "Jog отключен";
         }
     }
     return res;
@@ -578,9 +577,9 @@ long_data GetSpindleSpeed(unsigned short handle)
     return res;
 }
 
-long_data GetSpindleSpeedParam(unsigned short handle)
+int_data GetSpindleSpeedParam(unsigned short handle)
 {
-    long_data res = {};
+    int_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -591,7 +590,7 @@ long_data GetSpindleSpeedParam(unsigned short handle)
         if (ret != EW_OK)
             res.error = ret;
         else
-            res.data = buf.u.ldata;
+            res.data = (buf.u.ldata >> 1) & 1;
     }
     return res;
 }

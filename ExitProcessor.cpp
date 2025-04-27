@@ -3,12 +3,16 @@
 #include <windows.h>
 #include <iostream>
 #include <thread>
+#include "Collector.h"
 
 std::atomic_bool running{ true };
 std::atomic_bool exit_flag{ false };
 
 BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
 {
+    int time_couter = 0;
+    int delay_ms = 50;
+    int max_counter = 3000;
     switch (input_type)
     {
         case CTRL_C_EVENT:
@@ -17,8 +21,16 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
             running = false;
-            while(!exit_flag)
-                Sleep(100);
+            while (!exit_flag)
+            {
+                Sleep(delay_ms);
+                time_couter += delay_ms;
+                if (time_couter >= max_counter)
+                {
+                    FreeAllHandles();
+                    break;
+                }
+            }
             return TRUE;
         default:
             return FALSE;

@@ -53,7 +53,7 @@ long_map_data GetMachinePositions(unsigned short handle);
 long_map_data GetRelativePositions(unsigned short handle);
 //spindle data
 long_data GetSpindleSpeed(unsigned short handle);
-long_data GetSpindleSpeedParam(unsigned short handle);
+int_data GetSpindleSpeedParam(unsigned short handle);
 map_data GetSpindleMotorSpeed(unsigned short handle);
 map_data GetSpindleLoad(unsigned short handle);
 short_data GetSpindleOverride(unsigned short handle);

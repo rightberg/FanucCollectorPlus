@@ -39,7 +39,7 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     long_map_data relative_positions = GetRelativePositions(handle);
     //spindle data
     long_data spindle_speed = GetSpindleSpeed(handle);
-    long_data spindle_param_speed = GetSpindleSpeedParam(handle);
+    int_data spindle_param_speed = GetSpindleSpeedParam(handle);
     map_data spindle_motor_speed = GetSpindleMotorSpeed(handle);
     map_data spindle_load = GetSpindleLoad(handle);
     short_data spindle_override = GetSpindleOverride(handle);
@@ -111,7 +111,6 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     {
         if (data.errors[i] != 0)
         {
-            data.errors_str[i] = GetCncErrorMessage(data.errors[i]);
             if (first_error == data.errors[i])
                 equal_counter++;
         }
@@ -130,20 +129,23 @@ bool ParseDevices(const char* json, std::vector<Device>& devices)
     if (!ok)
         return false;
 
-    for (const auto& deviceValue : doc.GetArray()) 
+    for (const auto& device_value : doc.GetArray()) 
     {
         Device device;
-        if (deviceValue.HasMember("name") && deviceValue["name"].IsString()) 
-            device.name = deviceValue["name"].GetString();
+        if (device_value.HasMember("name") && device_value["name"].IsString())
+            device.name = device_value["name"].GetString();
 
-        if (deviceValue.HasMember("address") && deviceValue["address"].IsString())
-            device.address = deviceValue["address"].GetString();
+        if (device_value.HasMember("address") && device_value["address"].IsString())
+            device.address = device_value["address"].GetString();
 
-        if (deviceValue.HasMember("series") && deviceValue["series"].IsString())
-            device.series = deviceValue["series"].GetString();
+        if (device_value.HasMember("series") && device_value["series"].IsString())
+            device.series = device_value["series"].GetString();
 
-        if (deviceValue.HasMember("port") && deviceValue["port"].IsInt())
-            device.port = deviceValue["port"].GetInt();
+        if (device_value.HasMember("port") && device_value["port"].IsInt())
+            device.port = device_value["port"].GetInt();
+
+        if (device_value.HasMember("delay_ms") && device_value["delay_ms"].IsInt())
+            device.delay_ms = device_value["delay_ms"].GetInt();
 
         devices.push_back(device);
     }
@@ -251,12 +253,6 @@ std::string SerializeFanucData(FanucData& data)
     writer.StartArray();
     for (auto error : data.errors)
         writer.Int(error);
-    writer.EndArray();
-
-    writer.Key("errors_str");
-    writer.StartArray();
-    for (const auto& err_str : data.errors_str)
-        writer.String(err_str.c_str());
     writer.EndArray();
 
     writer.EndObject();
