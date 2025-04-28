@@ -268,7 +268,6 @@ int_data GetPartsCount(unsigned short handle)
     return res;
 }
 
-//test
 long_data GetToolNumber(unsigned short handle)
 {
     long_data res = {};
@@ -276,13 +275,12 @@ long_data GetToolNumber(unsigned short handle)
         res.error = -8;
     else
     {
-        IODBTLMNG buf = {};
-        short data_num = 1;
-        short ret = cnc_rdtool(handle, 1, &data_num, &buf);
+        ODBTLIFE4 buf = {};
+        short ret = cnc_toolnum(handle, 0, 0, &buf);
         if (ret != EW_OK)
             res.error = ret;
         else
-            res.data = buf.T_code;
+            res.data = buf.data;
     }
     return res;
 }
@@ -414,7 +412,6 @@ short_data GetFeedOverride(unsigned short handle)
     return res;
 }
 
-//test
 //short result = Focas1.cnc_rdparam(handle, 1401, 0, 8, jov);
 //bool jog_enabled = (jov.cdata & 0x01) != 0;
 short_data GetJogOverride(unsigned short handle)
@@ -434,30 +431,32 @@ short_data GetJogOverride(unsigned short handle)
     return res;
 }
 
-//1423 parametrer (jog feed)
-long_data GetJogSpeed(unsigned short handle)
+double_map_data GetJogSpeed(unsigned short handle)
 {
-    long_data res = {};
+    double_map_data res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        ODBAXDT buf[MAX_AXIS] = {};
+        ODBAXDT buf[MAX_AXIS];
+        short types[1] = { 2 };
         short lenght = MAX_AXIS;
-        short type = 5;
-        short ret = cnc_rdaxisdata(handle, 5, &type, 5, &lenght, buf);
+        short ret = cnc_rdaxisdata(handle, 5, types, 1, &lenght, buf);
         if (ret != EW_OK)
             res.error = ret;
         else
         {
-            bool jog_enabled = false;
-            for (int i = type * MAX_AXIS; i < type * MAX_AXIS + lenght; i++) 
+            int flag = 0;
+            long data = 0;
+            short dec = 0;
+            for (int i = 0; i < lenght; i++) 
             {
-                jog_enabled = (buf[i].flag & 0x02) != 0;
-                if (jog_enabled)
+                flag = (buf[i].flag >> 1) & 1;
+                if (flag == 0)
                 {
-                    res.data = buf[i].data;
-                    return res;
+                    dec = buf[i].dec;
+                    data = buf[i].data;
+                    res.data[buf[i].name] = data * std::pow(10, -dec);
                 }
             }
         }
@@ -490,68 +489,50 @@ map_data GetAllServoLoad(unsigned short handle)
     return res;
 }
 
-// N : 2086 Word axis Rated current parameter
-float_data GetServoCurrentLoad(unsigned short handle)
+double_map_data GetServoCurrentLoad(unsigned short handle)
 {
-    float_data res = {};
+    double_map_data res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        IODBPSD n;
-        short ret = cnc_rdparam(handle, 2086, -1, sizeof(n), &n);
+        ODBAXDT buf[MAX_AXIS];
+        short types[1] = { 2 };
+        short lenght = MAX_AXIS;
+        short ret = cnc_rdaxisdata(handle, 2, types, 1, &lenght, buf);
         if (ret != EW_OK)
             res.error = ret;
         else
         {
-            ODBAD parameter = {};
-            short ret = cnc_adcnv(handle, 2, 2, &parameter);
-            if (ret != EW_OK)
+            long data = 0;
+            short dec = 0;
+            for (int i = 0; i < lenght; i++)
             {
-                res.error = ret;
-            }
-            else
-            {
-                long prm = n.u.rdata.prm_val;
-                long dec = n.u.rdata.dec_val;
-
-                float value = prm * std::pow(10, -dec);
-                res.data = parameter.data * value / 6554;
+                dec = buf[i].dec;
+                data = buf[i].data;
+                res.data[buf[i].name] = data * std::pow(10, -dec);
             }
         }
     }
     return res;
 }
 
-// N : 2086 Word axis Rated current parameter
-// Max : 2165 Word axis Maximum amplifier current
-float_data GetServoCurrentPercentLoad(unsigned short handle)
+long_map_data GetServoCurrentPercentLoad(unsigned short handle)
 {
-    float_data res = {};
+    long_map_data res = {};
     if (handle == 0)
         res.error = -8;
-    float_data current_data = GetServoCurrentLoad(handle);
-    if (current_data.IsError())
-    {
-        res.error = current_data.error;
-    }
     else
     {
-        IODBPSD max;
-        short ret = cnc_rdparam(handle, 2165, -1, sizeof(max), &max);
+        ODBAXDT buf[MAX_AXIS];
+        short types[1] = { 1 };
+        short lenght = MAX_AXIS;
+        short ret = cnc_rdaxisdata(handle, 2, types, 1, &lenght, buf);
         if (ret != EW_OK)
-        {
             res.error = ret;
-        }
         else
-        {
-            long prm = max.u.rdata.prm_val;
-            long dec = max.u.rdata.dec_val;
-
-            float value = prm * std::pow(10, -dec);
-            if (value > 0)
-                res.data = (current_data.data / value) * 100;
-        }
+            for (int i = 0; i < lenght; i++)
+                res.data[buf[i].name] = buf[i].data;
     }
     return res;
 }
@@ -577,20 +558,22 @@ long_data GetSpindleSpeed(unsigned short handle)
     return res;
 }
 
-int_data GetSpindleSpeedParam(unsigned short handle)
+long_map_data GetSpindleSpeedParam(unsigned short handle)
 {
-    int_data res = {};
+    long_map_data res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        IODBPSD buf;
-        short ret = cnc_rdparam(handle, 3799, -1, sizeof(buf), &buf);
-
+        ODBAXDT buf[MAX_SPINDLE];
+        short types[1] = { 2 };
+        short lenght = MAX_SPINDLE;
+        short ret = cnc_rdaxisdata(handle, 3, types, 1, &lenght, buf);
         if (ret != EW_OK)
             res.error = ret;
         else
-            res.data = (buf.u.ldata >> 1) & 1;
+            for (int i = 0; i < lenght; i++)
+                res.data[buf[i].name] = buf[i].data;
     }
     return res;
 }
@@ -629,14 +612,14 @@ map_data GetSpindleLoad(unsigned short handle)
     {
         ODBSPLOAD buf[MAX_SPINDLE];
         short num = MAX_SPINDLE;
-        short ret = cnc_rdspmeter(handle, 1, &num, buf);
+        short ret = cnc_rdspmeter(handle, 0, &num, buf);
         if (ret != EW_OK)
             res.error = ret;
         else
         {
             for (int i = 0; i < num; i++)
             {
-                std::string name(1, buf[i].spload.name);
+                std::string name = std::string(1, buf[i].spload.name);
                 int value = buf[i].spload.data;
                 res.data[name] = value;
             }
@@ -645,7 +628,7 @@ map_data GetSpindleLoad(unsigned short handle)
     return res;
 }
 
-//test
+// only 15i series
 short_data GetSpindleOverride(unsigned short handle)
 {
     short_data res = {};

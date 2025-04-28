@@ -30,19 +30,19 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     long_data feedrate = GetFeedRate(handle);
     short_data feed_override = GetFeedOverride(handle);
     short_data jog_override = GetJogOverride(handle);
-    long_data jog_speed = GetJogSpeed(handle);
-    float_data current_load = GetServoCurrentLoad(handle);
-    float_data current_load_percent = GetServoCurrentPercentLoad(handle);
     map_data servo_loads = GetAllServoLoad(handle);
     long_map_data absolute_positions = GetAbsolutePositions(handle);
     long_map_data machine_positions = GetMachinePositions(handle);
     long_map_data relative_positions = GetRelativePositions(handle);
+    long_map_data current_load_percent = GetServoCurrentPercentLoad(handle);
+    double_map_data current_load = GetServoCurrentLoad(handle);
+    double_map_data jog_speed = GetJogSpeed(handle);
     //spindle data
     long_data spindle_speed = GetSpindleSpeed(handle);
-    int_data spindle_param_speed = GetSpindleSpeedParam(handle);
     map_data spindle_motor_speed = GetSpindleMotorSpeed(handle);
     map_data spindle_load = GetSpindleLoad(handle);
     short_data spindle_override = GetSpindleOverride(handle);
+    long_map_data spindle_param_speed = GetSpindleSpeedParam(handle);
     //alarm data
     short_data emergency = GetEmergencyStop(handle);
     short_data alarm = GetAlarmStatus(handle);
@@ -83,7 +83,6 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     current_load.PullData(data.current_load, data.errors[18]);
     current_load_percent.PullData(data.current_load_percent, data.errors[19]);
     servo_loads.PullData(data.servo_loads, data.errors[20]);
-    ///
     absolute_positions.PullData(data.absolute_positions, data.errors[21]);
     machine_positions.PullData(data.machine_positions, data.errors[22]);
     relative_positions.PullData(data.relative_positions, data.errors[23]);
@@ -183,9 +182,33 @@ std::string SerializeFanucData(FanucData& data)
     writer.Key("feedrate");             writer.Int64(data.feedrate);
     writer.Key("feed_override");        writer.Int(data.feed_override);
     writer.Key("jog_override");         writer.Int(data.jog_override);
-    writer.Key("jog_speed");            writer.Int64(data.jog_speed);
-    writer.Key("current_load");         writer.Double(data.current_load);
-    writer.Key("current_load_percent"); writer.Double(data.current_load_percent);
+
+    writer.Key("current_load_percent");
+    writer.StartObject();
+    for (const auto& pair : data.current_load_percent)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int64(pair.second);
+    }
+    writer.EndObject();
+
+    writer.Key("current_load");
+    writer.StartObject();
+    for (const auto& pair : data.current_load)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Double(pair.second);
+    }
+    writer.EndObject();
+
+    writer.Key("jog_speed");
+    writer.StartObject();
+    for (const auto& pair : data.jog_speed)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Double(pair.second);
+    }
+    writer.EndObject();
     writer.Key("servo_loads");
     writer.StartObject();
     for (const auto& pair : data.servo_loads)
@@ -220,8 +243,17 @@ std::string SerializeFanucData(FanucData& data)
     writer.EndObject();
     //spindle data
     writer.Key("spindle_speed");       writer.Int64(data.spindle_speed);
-    writer.Key("spindle_param_speed"); writer.Int64(data.spindle_param_speed);
     writer.Key("spindle_override");    writer.Int(data.spindle_override);
+
+    writer.Key("spindle_param_speed");
+    writer.StartObject();
+    for (const auto& pair : data.spindle_param_speed)
+    {
+        writer.Key(pair.first.c_str());
+        writer.Int64(pair.second);
+    }
+    writer.EndObject();
+
     writer.Key("spindle_motor_speed");
     writer.StartObject();
     for (const auto& pair : data.spindle_motor_speed)
@@ -230,6 +262,7 @@ std::string SerializeFanucData(FanucData& data)
         writer.Int(pair.second);
     }
     writer.EndObject();
+
     writer.Key("spindle_load");
     writer.StartObject();
     for (const auto& pair : data.spindle_load)

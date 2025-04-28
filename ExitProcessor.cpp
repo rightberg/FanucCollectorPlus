@@ -9,7 +9,7 @@
 std::atomic_bool running{ true };
 std::atomic_bool exit_flag{ false };
 
-BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
+static BOOL WINAPI ConsoleHandlerRoutine(DWORD input_type)
 {
     int time_couter = 0;
     int delay_ms = 50;

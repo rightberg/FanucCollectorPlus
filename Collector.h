@@ -41,19 +41,19 @@ struct FanucData
     short jog_override;
     short feed_override;
     long feedrate;
-    long jog_speed;
-    float current_load;
-    float current_load_percent;
     std::map<std::string, int> servo_loads;
     std::map<std::string, long> absolute_positions;
     std::map<std::string, long> machine_positions;
     std::map<std::string, long> relative_positions;
+    std::map<std::string, long> current_load_percent;
+    std::map<std::string, double> current_load;
+    std::map<std::string, double> jog_speed;
     //spindle data
     short spindle_override;
     long spindle_speed;
-    int spindle_param_speed;
     std::map<std::string, int> spindle_motor_speed;
     std::map<std::string, int> spindle_load;
+    std::map<std::string, long> spindle_param_speed;
     //alarm data
     short emergency;
     short alarm;

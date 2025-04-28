@@ -44,19 +44,19 @@ long_data GetFrameNumber(unsigned short handle);
 long_data GetFeedRate(unsigned short handle);
 short_data GetFeedOverride(unsigned short handle);
 short_data GetJogOverride(unsigned short handle);
-long_data GetJogSpeed(unsigned short handle);
-float_data GetServoCurrentLoad(unsigned short handle);
-float_data GetServoCurrentPercentLoad(unsigned short handle);
+double_map_data GetJogSpeed(unsigned short handle);
+double_map_data GetServoCurrentLoad(unsigned short handle);
+long_map_data GetServoCurrentPercentLoad(unsigned short handle);
 map_data GetAllServoLoad(unsigned short handle);
 long_map_data GetAbsolutePositions(unsigned short handle);
 long_map_data GetMachinePositions(unsigned short handle);
 long_map_data GetRelativePositions(unsigned short handle);
 //spindle data
 long_data GetSpindleSpeed(unsigned short handle);
-int_data GetSpindleSpeedParam(unsigned short handle);
 map_data GetSpindleMotorSpeed(unsigned short handle);
 map_data GetSpindleLoad(unsigned short handle);
 short_data GetSpindleOverride(unsigned short handle);
+long_map_data GetSpindleSpeedParam(unsigned short handle);
 //alarm data
 short_data GetEmergencyStop(unsigned short handle);
 short_data GetAlarmStatus(unsigned short handle);
