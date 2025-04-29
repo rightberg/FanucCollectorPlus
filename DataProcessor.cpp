@@ -15,10 +15,10 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     short_data run = GetRunState(handle);
     short_data edit = GetStatus(handle);
     short_data shutdowns = GetShutdowns(handle);
-    short_data hight_speed = GetHightSpeed(handle);
+    short_data g00 = GetG00(handle);
     short_data motion = GetAxisMotion(handle);
     short_data mstb = GetMstb(handle);
-    long_data load_excess = GetLoadExcess(handle);
+    short_data load_excess = GetLoadExcess(handle);
     //program data
     str_data frame = GetFrame(handle);
     short_data main_prog_number = GetMainPrgNumber(handle);
@@ -47,10 +47,13 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     short_data emergency = GetEmergencyStop(handle);
     short_data alarm = GetAlarmStatus(handle);
     //other data
+    short_data axes_number = GetCtrlAxesNumber(handle);
+    short_data spindles_number = GetCtrlSpindlesNumber(handle);
+    short_data channels_number = GetCtrlPathsNumber(handle);
     long_data power_on_time = GetPowerOnTime(handle);
-    long_data operation_time = GetOperationTime(handle);
-    long_data cutting_time = GetCuttingTime(handle);
-    long_data cycle_time = GetCycleTime(handle);
+    double_data operation_time = GetOperationTime(handle);
+    double_data cutting_time = GetCuttingTime(handle);
+    double_data cycle_time = GetCycleTime(handle);
     str_data series_number = GetSeriesNumber(handle);
     str_data version_number = GetVersionNumber(handle);
 
@@ -64,7 +67,7 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     run.PullData(data.run, data.errors[1]);
     edit.PullData(data.edit, data.errors[2]);
     shutdowns.PullData(data.shutdowns, data.errors[3]);
-    hight_speed.PullData(data.hight_speed, data.errors[4]);
+    g00.PullData(data.g00, data.errors[4]);
     motion.PullData(data.motion, data.errors[5]);
     mstb.PullData(data.mstb, data.errors[6]);
     load_excess.PullData(data.load_excess, data.errors[7]);
@@ -95,25 +98,25 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     //pull alarm data
     emergency.PullData(data.emergency, data.errors[29]);
     alarm.PullData(data.alarm, data.errors[30]);
-    //pull other data
-    power_on_time.PullData(data.power_on_time, data.errors[31]);
-    operation_time.PullData(data.operation_time, data.errors[32]);
-    cutting_time.PullData(data.cutting_time, data.errors[33]);
-    cycle_time.PullData(data.cycle_time, data.errors[34]);
-    series_number.PullData(data.series_number, data.errors[35]);
-    version_number.PullData(data.version_number, data.errors[36]);
+    //pull model data
+
+    axes_number.PullData(data.axes_number, data.errors[31]);
+    spindles_number.PullData(data.spindles_number, data.errors[32]);
+    channels_number.PullData(data.channels_number, data.errors[33]);
+    power_on_time.PullData(data.power_on_time, data.errors[34]);
+    operation_time.PullData(data.operation_time, data.errors[35]);
+    cutting_time.PullData(data.cutting_time, data.errors[36]);
+    cycle_time.PullData(data.cycle_time, data.errors[37]);
+    series_number.PullData(data.series_number, data.errors[38]);
+    version_number.PullData(data.version_number, data.errors[39]);
 
     int equal_counter = 0;
     short first_error = data.errors[0];
     int max_errors = data.errors.size();
     for (int i = 0; i < max_errors; i++)
-    {
         if (data.errors[i] != 0)
-        {
             if (first_error == data.errors[i])
                 equal_counter++;
-        }
-    }
     if (equal_counter == max_errors)
         return false;
     else
@@ -163,14 +166,14 @@ std::string SerializeFanucData(FanucData& data)
     writer.Key("address"); writer.String(data.address.c_str());
     writer.Key("port");    writer.Int(data.port);
     //mode data 
-    writer.Key("aut");        writer.Int(data.aut);
-    writer.Key("run");   writer.Int(data.run);
-    writer.Key("edit");      writer.Int(data.edit);
+    writer.Key("aut");         writer.Int(data.aut);
+    writer.Key("run");         writer.Int(data.run);
+    writer.Key("edit");        writer.Int(data.edit);
     writer.Key("shutdowns");   writer.Int(data.shutdowns);
-    writer.Key("hight_speed"); writer.Int(data.hight_speed);
+    writer.Key("g00");    writer.Int(data.g00);
     writer.Key("motion"); writer.Int(data.motion);
     writer.Key("mstb");        writer.Int(data.mstb);
-    writer.Key("load_excess"); writer.Int64(data.load_excess);
+    writer.Key("load_excess"); writer.Int(data.load_excess);
     //program data
     writer.Key("frame");            writer.String(data.frame.c_str());
     writer.Key("main_prog_number"); writer.Int(data.main_prog_number);
@@ -275,10 +278,14 @@ std::string SerializeFanucData(FanucData& data)
     writer.Key("emergency");    writer.Int(data.emergency);
     writer.Key("alarm"); writer.Int(data.alarm);
     //other data
+    writer.Key("axes_number");      writer.Int(data.axes_number);
+    writer.Key("spindles_number");      writer.Int(data.spindles_number);
+    writer.Key("channels_number");      writer.Int(data.channels_number);
+
     writer.Key("power_on_time");    writer.Int(data.power_on_time);
-    writer.Key("operation_time"); writer.Int(data.operation_time);
-    writer.Key("cutting_time");    writer.Int(data.cutting_time);
-    writer.Key("cycle_time"); writer.Int(data.cycle_time);
+    writer.Key("operation_time"); writer.Double(data.operation_time);
+    writer.Key("cutting_time");    writer.Double(data.cutting_time);
+    writer.Key("cycle_time"); writer.Double(data.cycle_time);
     writer.Key("series_number"); writer.String(data.series_number.c_str());
     writer.Key("version_number"); writer.String(data.version_number.c_str());
     //errors data

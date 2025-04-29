@@ -18,8 +18,8 @@
 std::mutex cout_mutex;
 std::vector<Device> devices = {};
 std::vector<unsigned short> handles = {};
-int max_errors = 10;
 int min_delay_ms = 50;
+int max_errors = 10;
 int  handle_timeout = 10;
 
 void FreeAllHandles()
@@ -109,6 +109,14 @@ int main(int argc, char* argv[])
         int number = std::stoi(arg);
         if (number >= 1)
             handle_timeout = number;
+    }
+
+    if (argc >= 5)
+    {
+        std::string arg = argv[4];
+        int number = std::stoi(arg);
+        if (number >= 1)
+            max_errors = number;
     }
 
     if (!SetSignalHandler())

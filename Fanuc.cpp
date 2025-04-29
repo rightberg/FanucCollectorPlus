@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include "FanucTypes.h"
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -97,7 +98,7 @@ short_data GetShutdowns(unsigned short handle)
     short_data res = {};
     if (handle == 0)
         res.error = -8;
-    else 
+    else
     {
         unsigned short length = 256;
         short blknum;
@@ -118,25 +119,23 @@ short_data GetShutdowns(unsigned short handle)
     return res;
 }
 
-short_data GetHightSpeed(unsigned short handle)
+short_data GetG00(unsigned short handle)
 {
     short_data res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        unsigned short length = 256;
-        short blknum;
-        char buf[256];
-        short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
+        ODBMDL buf = {};
+        short ret = cnc_modal(handle, 0, 0, &buf);
         if (ret != EW_OK)
             res.error = ret;
         else
         {
-            if (strstr(buf, "G00"))
-                res.data = 0;
-            else
+            if(buf.modal.g_data == 0)
                 res.data = 1;
+            else
+                res.data = 0;
         }
     }
     return res;
@@ -177,19 +176,53 @@ short_data GetMstb(unsigned short handle)
 }
 
 //test
-long_data GetLoadExcess(unsigned short handle)
+short_data GetLoadExcess(unsigned short handle)
 {
-    long_data res = {};
+    short_data res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        long alarm;
-        short ret = cnc_alarm2(handle, &alarm);
+        short num = MAX_AXIS;
+        ODBSVLOAD buf_1[MAX_AXIS] = {};
+        short ret = cnc_rdsvmeter(handle, &num, buf_1);
         if (ret != EW_OK)
             res.error = ret;
         else
-            res.data = alarm;
+        {
+            short dec = 0;
+            double value = 0;
+            for (int i = 0; i < num; i++)
+            {
+                dec = buf_1[i].svload.dec;
+                value = buf_1[i].svload.data * std::pow(10, -dec);
+                if (value > 100)
+
+                    res.data = 1;
+                break;
+            }
+            num = MAX_SPINDLE;
+            ODBSPLOAD buf_2[MAX_SPINDLE] = {};
+            ret = cnc_rdspmeter(handle, 0, &num, buf_2);
+            if (ret != EW_OK)
+                res.error = ret;
+            else
+            {
+                for (int i = 0; i < num; i++)
+                {
+                    dec = buf_2[i].spload.dec;
+                    value = buf_2[i].spload.data * std::pow(10, -dec);
+                    if (value > 100)
+                    {
+                        if (res.data == 0)
+                            res.data = 2;
+                        else
+                            res.data = 3;
+                        break;
+                    }
+                }
+            }
+        }
     }
     return res;
 }
@@ -232,6 +265,23 @@ short_data GetSubPrgNumber(unsigned short handle)
     return res;
 }
 
+long_data GetFrameNumber(unsigned short handle)
+{
+    long_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBSEQ buf = {};
+        short ret = cnc_rdseqnum(handle, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.data;
+    }
+    return res;
+}
+
 str_data GetFrame(unsigned short handle)
 {
     str_data res = {};
@@ -239,17 +289,62 @@ str_data GetFrame(unsigned short handle)
         res.error = -8;
     else
     {
-        unsigned short length = 256;
-        short blknum;
-        char buf[256];
-        short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
+        char buf[1024];
+        unsigned short length = sizeof(buf);
+        short num;
+        short ret = cnc_rdexecprog(handle, &length, &num, buf);
         if (ret != EW_OK)
             res.error = ret;
-        else if (length != 0 && blknum >= 0 && blknum + length <= sizeof(buf))
-            res.data = std::string(buf + blknum, length);
+        else if (length != 0 && num >= 0 && length < sizeof(buf))
+        {
+            long_data frame_num_data = GetFrameNumber(handle);
+            if (frame_num_data.IsError())
+                res.error = ret;
+            else
+            {
+                buf[length] = '\0';
+                std::vector<std::string> lines;
+                std::string line;
+                for (int i = 0; i < length; ++i)
+                {
+                    if (buf[i] == '\n')
+                    {
+                        lines.push_back(line);
+                        line.clear();
+                    }
+                    else
+                        line.push_back(buf[i]);
+                }
+                if (!line.empty())
+                    lines.push_back(line);
+
+                for (const auto& line : lines)
+                    if (line.find("N" + std::to_string(frame_num_data.data)) != std::string::npos)
+                        res.data = line;
+
+                if (!lines.empty())
+                    res.data = lines.front();
+            }
+        }
     }
     return res;
 }
+
+    //str_data res = {};
+    //if (handle == 0)
+    //res.error = -8;
+    //else
+    //{
+    //    unsigned short length = 256;
+    //    short blknum;
+    //    char buf[256];
+    //    short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
+    //    if (ret != EW_OK)
+    //        res.error = ret;
+    //    else if (length != 0 && blknum >= 0 && blknum + length <= sizeof(buf))
+    //        res.data = std::string(buf, length);
+    //}
+    //return res;
 
 int_data GetPartsCount(unsigned short handle)
 {
@@ -284,24 +379,6 @@ long_data GetToolNumber(unsigned short handle)
     }
     return res;
 }
-
-long_data GetFrameNumber(unsigned short handle)
-{
-    long_data res = {};
-    if (handle == 0)
-        res.error = -8;
-    else
-    {
-        ODBSEQ buf = {};
-        short ret = cnc_rdseqnum(handle, &buf);
-        if (ret != EW_OK)
-            res.error = ret;
-        else
-            res.data = buf.data;
-    }
-    return res;
-}
-
 #pragma endregion
 
 #pragma region Axis data
@@ -603,6 +680,7 @@ map_data GetSpindleMotorSpeed(unsigned short handle)
     return res;
 }
 
+//test
 map_data GetSpindleLoad(unsigned short handle)
 {
     map_data res = {};
@@ -619,7 +697,7 @@ map_data GetSpindleLoad(unsigned short handle)
         {
             for (int i = 0; i < num; i++)
             {
-                std::string name = std::string(1, buf[i].spload.name);
+                std::string name = std::string(1, buf[i].spload.name + buf[i].spload.suff1);
                 int value = buf[i].spload.data;
                 res.data[name] = value;
             }
@@ -705,9 +783,9 @@ long_data GetPowerOnTime(unsigned short handle)
     return res;
 }
 
-long_data GetOperationTime(unsigned short handle)
+double_data GetOperationTime(unsigned short handle)
 {
-    long_data res = {};
+    double_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -723,15 +801,15 @@ long_data GetOperationTime(unsigned short handle)
             if (ret != EW_OK)
                 res.error = ret;
             else
-                res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
+                res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
 }
 
-long_data GetCuttingTime(unsigned short handle)
+double_data GetCuttingTime(unsigned short handle)
 {
-    long_data res = {};
+    double_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -747,15 +825,15 @@ long_data GetCuttingTime(unsigned short handle)
             if (ret != EW_OK)
                 res.error = ret;
             else
-                res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
+                res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
 }
 
-long_data GetCycleTime(unsigned short handle)
+double_data GetCycleTime(unsigned short handle)
 {
-    long_data res = {};
+    double_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -771,7 +849,7 @@ long_data GetCycleTime(unsigned short handle)
             if (ret != EW_OK)
                 res.error = ret;
             else
-                res.data = buf_1.u.rdata.prm_val + buf_2.u.rdata.prm_val;
+                res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
@@ -811,4 +889,64 @@ str_data GetVersionNumber(unsigned short handle)
     return res;
 }
 
+short_data GetCtrlAxesNumber(unsigned short handle)
+{
+    short_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBSYSEX  buf;
+        short ret = cnc_sysinfo_ex(handle, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.ctrl_axis;
+    }
+    return res;
+}
+
+short_data GetCtrlSpindlesNumber(unsigned short handle)
+{
+    short_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBSYSEX  buf;
+        short ret = cnc_sysinfo_ex(handle, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.ctrl_spdl;
+    }
+    return res;
+}
+
+short_data GetCtrlPathsNumber(unsigned short handle)
+{
+    short_data res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        ODBSYSEX  buf;
+        short ret = cnc_sysinfo_ex(handle, &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.ctrl_path;
+    }
+    return res;
+}
+
 #pragma endregion
+
+
+//6750 power on in minutes
+//6751 operating time milliseconds counter
+//6752 operating time minute counter
+//6753 cutting time milliseconds counter
+//6754 cutting time minutes counter.
+//6757 parts time  milliseconds
+//6758 parts time minutes.

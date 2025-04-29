@@ -109,6 +109,25 @@ typedef struct float_data
 	}
 } float_data;
 
+typedef struct double_data
+{
+	double data;
+	short error;
+
+	bool IsError() const
+	{
+		return error != 0;
+	}
+
+	void PullData(double& _data, short& _error) const
+	{
+		if (error != 0)
+			_error = error;
+		else
+			_data = data;
+	}
+} double_data;
+
 typedef struct short_data
 {
 	short  data;

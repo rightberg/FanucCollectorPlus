@@ -26,10 +26,10 @@ struct FanucData
     short run;
     short edit;
     short shutdowns;
-    short hight_speed;
+    short g00;
     short motion;
     short mstb;
-    long load_excess;
+    short load_excess;
     //program data
     std::string frame;
     short main_prog_number;
@@ -58,14 +58,17 @@ struct FanucData
     short emergency;
     short alarm;
     //other data
+    short axes_number;
+    short spindles_number;
+    short channels_number;
     long power_on_time;
-    long operation_time;
-    long cutting_time;
-    long cycle_time;
+    double operation_time;
+    double cutting_time;
+    double cycle_time;
     std::string series_number;
     std::string version_number;
     //errors data
-    std::vector<short> errors = std::vector<short>(37);
+    std::vector<short> errors = std::vector<short>(40);
 };
 
 //process data

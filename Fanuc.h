@@ -29,10 +29,10 @@ short_data GetMode(unsigned short handle);
 short_data GetRunState(unsigned short handle);
 short_data GetStatus(unsigned short handle);
 short_data GetShutdowns(unsigned short handle);
-short_data GetHightSpeed(unsigned short handle);
+short_data GetG00(unsigned short handle);
 short_data GetAxisMotion(unsigned short handle);
 short_data GetMstb(unsigned short handle);
-long_data GetLoadExcess(unsigned short handle);
+short_data GetLoadExcess(unsigned short handle);
 //program data
 short_data GetMainPrgNumber(unsigned short handle);
 short_data GetSubPrgNumber(unsigned short handle);
@@ -61,10 +61,13 @@ long_map_data GetSpindleSpeedParam(unsigned short handle);
 short_data GetEmergencyStop(unsigned short handle);
 short_data GetAlarmStatus(unsigned short handle);
 //other data
+short_data GetCtrlAxesNumber(unsigned short handle);
+short_data GetCtrlSpindlesNumber(unsigned short handle);
+short_data GetCtrlPathsNumber(unsigned short handle);
 long_data GetPowerOnTime(unsigned short handle);
-long_data GetOperationTime(unsigned short handle);
-long_data GetCuttingTime(unsigned short handle);
-long_data GetCycleTime(unsigned short handle);
+double_data GetOperationTime(unsigned short handle);
+double_data GetCuttingTime(unsigned short handle);
+double_data GetCycleTime(unsigned short handle);
 str_data GetSeriesNumber(unsigned short handle);
 str_data GetVersionNumber(unsigned short handle);
 #endif
