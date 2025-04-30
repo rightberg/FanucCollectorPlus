@@ -48,9 +48,9 @@ double_map_data GetJogSpeed(unsigned short handle);
 double_map_data GetServoCurrentLoad(unsigned short handle);
 long_map_data GetServoCurrentPercentLoad(unsigned short handle);
 map_data GetAllServoLoad(unsigned short handle);
-long_map_data GetAbsolutePositions(unsigned short handle);
-long_map_data GetMachinePositions(unsigned short handle);
-long_map_data GetRelativePositions(unsigned short handle);
+double_map_data GetAbsolutePositions(unsigned short handle);
+double_map_data GetMachinePositions(unsigned short handle);
+double_map_data GetRelativePositions(unsigned short handle);
 //spindle data
 long_data GetSpindleSpeed(unsigned short handle);
 map_data GetSpindleMotorSpeed(unsigned short handle);

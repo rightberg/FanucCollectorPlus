@@ -42,9 +42,9 @@ struct FanucData
     short feed_override;
     long feedrate;
     std::map<std::string, int> servo_loads;
-    std::map<std::string, long> absolute_positions;
-    std::map<std::string, long> machine_positions;
-    std::map<std::string, long> relative_positions;
+    std::map<std::string, double> absolute_positions;
+    std::map<std::string, double> machine_positions;
+    std::map<std::string, double> relative_positions;
     std::map<std::string, long> current_load_percent;
     std::map<std::string, double> current_load;
     std::map<std::string, double> jog_speed;

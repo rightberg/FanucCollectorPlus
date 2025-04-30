@@ -31,9 +31,9 @@ bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
     short_data feed_override = GetFeedOverride(handle);
     short_data jog_override = GetJogOverride(handle);
     map_data servo_loads = GetAllServoLoad(handle);
-    long_map_data absolute_positions = GetAbsolutePositions(handle);
-    long_map_data machine_positions = GetMachinePositions(handle);
-    long_map_data relative_positions = GetRelativePositions(handle);
+    double_map_data absolute_positions = GetAbsolutePositions(handle);
+    double_map_data machine_positions = GetMachinePositions(handle);
+    double_map_data relative_positions = GetRelativePositions(handle);
     long_map_data current_load_percent = GetServoCurrentPercentLoad(handle);
     double_map_data current_load = GetServoCurrentLoad(handle);
     double_map_data jog_speed = GetJogSpeed(handle);
@@ -225,7 +225,7 @@ std::string SerializeFanucData(FanucData& data)
     for (const auto& pair : data.absolute_positions)
     {
         writer.Key(pair.first.c_str());
-        writer.Int(pair.second);
+        writer.Double(pair.second);
     }
     writer.EndObject();
     writer.Key("machine_positions");
@@ -233,7 +233,7 @@ std::string SerializeFanucData(FanucData& data)
     for (const auto& pair : data.machine_positions)
     {
         writer.Key(pair.first.c_str());
-        writer.Int(pair.second);
+        writer.Double(pair.second);
     }
     writer.EndObject();
     writer.Key("relative_positions");
@@ -241,7 +241,7 @@ std::string SerializeFanucData(FanucData& data)
     for (const auto& pair : data.relative_positions)
     {
         writer.Key(pair.first.c_str());
-        writer.Int(pair.second);
+        writer.Double(pair.second);
     }
     writer.EndObject();
     //spindle data

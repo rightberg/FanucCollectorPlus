@@ -138,7 +138,6 @@ int main(int argc, char* argv[])
 
     for (auto& thread : threads) 
         thread.join();
-
     exit_flag = true;
     return 0;
 }

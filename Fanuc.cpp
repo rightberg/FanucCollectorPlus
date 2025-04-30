@@ -132,7 +132,7 @@ short_data GetG00(unsigned short handle)
             res.error = ret;
         else
         {
-            if(buf.modal.g_data == 0)
+            if (buf.modal.g_data == 0)
                 res.data = 1;
             else
                 res.data = 0;
@@ -307,7 +307,7 @@ str_data GetFrame(unsigned short handle)
                 std::string line;
                 for (int i = 0; i < length; ++i)
                 {
-                    if (buf[i] == '\n')
+                    if (buf[i] == '\n' || buf[i] == '\0')
                     {
                         lines.push_back(line);
                         line.clear();
@@ -383,9 +383,9 @@ long_data GetToolNumber(unsigned short handle)
 
 #pragma region Axis data
 
-long_map_data GetAbsolutePositions(unsigned short handle)
+double_map_data GetAbsolutePositions(unsigned short handle)
 {
-    long_map_data res = {};
+    double_map_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -397,19 +397,21 @@ long_map_data GetAbsolutePositions(unsigned short handle)
             res.error = ret;
         else
         {
+            short dec;
             for (int i = 0; i < num; i++)
             {
                 std::string name(1, pos[i].abs.name);
-                res.data[name] = pos[i].abs.data;
+                dec = pos[i].abs.dec;
+                res.data[name] = pos[i].abs.data * std::pow(10,-dec);
             }
         }
     }
     return res;
 }
 
-long_map_data GetMachinePositions(unsigned short handle)
+double_map_data GetMachinePositions(unsigned short handle)
 {
-    long_map_data res = {};
+    double_map_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -421,19 +423,21 @@ long_map_data GetMachinePositions(unsigned short handle)
             res.error = ret;
         else
         {
+            short dec;
             for (int i = 0; i < num; i++)
             {
                 std::string name(1, pos[i].mach.name);
-                res.data[name] = pos[i].mach.data;
+                dec = pos[i].mach.dec;
+                res.data[name] = pos[i].mach.data * std::pow(10, -dec);
             }
         }
     }
     return res;
 }
 
-long_map_data GetRelativePositions(unsigned short handle)
+double_map_data GetRelativePositions(unsigned short handle)
 {
-    long_map_data res = {};
+    double_map_data res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -445,10 +449,12 @@ long_map_data GetRelativePositions(unsigned short handle)
             res.error = ret;
         else
         {
+            short dec;
             for (int i = 0; i < num; i++)
             {
                 std::string name(1, pos[i].rel.name);
-                res.data[name] = pos[i].rel.data;
+                dec = pos[i].rel.dec;
+                res.data[name] = pos[i].rel.data * std::pow(10, -dec);
             }
         }
     }
@@ -669,9 +675,11 @@ map_data GetSpindleMotorSpeed(unsigned short handle)
             res.error = ret;
         else
         {
+            std::string name;
             for (int i = 0; i < num; i++)
             {
-                std::string name = std::string(1, buf[i].spspeed.name);
+                name += buf[i].spspeed.name;
+                name += buf[i].spspeed.suff1;
                 int value = buf[i].spspeed.data;
                 res.data[name] = value;
             }
@@ -697,7 +705,9 @@ map_data GetSpindleLoad(unsigned short handle)
         {
             for (int i = 0; i < num; i++)
             {
-                std::string name = std::string(1, buf[i].spload.name + buf[i].spload.suff1);
+                std::string name;
+                name += buf[i].spload.name;
+                name += buf[i].spload.suff1;
                 int value = buf[i].spload.data;
                 res.data[name] = value;
             }
@@ -941,12 +951,3 @@ short_data GetCtrlPathsNumber(unsigned short handle)
 }
 
 #pragma endregion
-
-
-//6750 power on in minutes
-//6751 operating time milliseconds counter
-//6752 operating time minute counter
-//6753 cutting time milliseconds counter
-//6754 cutting time minutes counter.
-//6757 parts time  milliseconds
-//6758 parts time minutes.
