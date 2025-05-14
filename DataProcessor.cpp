@@ -4,124 +4,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include <ranges>
+#include <map>
+#include <functional>
 #include "Fanuc.h"
 #include "FanucTypes.h"
 #include "Collector.h"
+#include <stdio.h>
+#include <iostream>
 
-bool SetFanucData(unsigned short handle, const Device& device, FanucData& data)
+struct MergedData 
 {
-    //mode data
-    short_data aut = GetMode(handle);
-    short_data run = GetRunState(handle);
-    short_data edit = GetStatus(handle);
-    short_data shutdowns = GetShutdowns(handle);
-    short_data g00 = GetG00(handle);
-    short_data motion = GetAxisMotion(handle);
-    short_data mstb = GetMstb(handle);
-    short_data load_excess = GetLoadExcess(handle);
-    //program data
-    str_data frame = GetFrame(handle);
-    short_data main_prog_number = GetMainPrgNumber(handle);
-    short_data sub_prog_number = GetSubPrgNumber(handle);
-    int_data parts_count = GetPartsCount(handle);
-    long_data tool_number = GetToolNumber(handle);
-    long_data frame_number = GetFrameNumber(handle);
-    //axes data
-    long_data feedrate = GetFeedRate(handle);
-    short_data feed_override = GetFeedOverride(handle);
-    short_data jog_override = GetJogOverride(handle);
-    map_data servo_loads = GetAllServoLoad(handle);
-    double_map_data absolute_positions = GetAbsolutePositions(handle);
-    double_map_data machine_positions = GetMachinePositions(handle);
-    double_map_data relative_positions = GetRelativePositions(handle);
-    long_map_data current_load_percent = GetServoCurrentPercentLoad(handle);
-    double_map_data current_load = GetServoCurrentLoad(handle);
-    double_map_data jog_speed = GetJogSpeed(handle);
-    //spindle data
-    long_data spindle_speed = GetSpindleSpeed(handle);
-    map_data spindle_motor_speed = GetSpindleMotorSpeed(handle);
-    map_data spindle_load = GetSpindleLoad(handle);
-    short_data spindle_override = GetSpindleOverride(handle);
-    long_map_data spindle_param_speed = GetSpindleSpeedParam(handle);
-    //alarm data
-    short_data emergency = GetEmergencyStop(handle);
-    short_data alarm = GetAlarmStatus(handle);
-    //other data
-    short_data axes_number = GetCtrlAxesNumber(handle);
-    short_data spindles_number = GetCtrlSpindlesNumber(handle);
-    short_data channels_number = GetCtrlPathsNumber(handle);
-    long_data power_on_time = GetPowerOnTime(handle);
-    double_data operation_time = GetOperationTime(handle);
-    double_data cutting_time = GetCuttingTime(handle);
-    double_data cycle_time = GetCycleTime(handle);
-    str_data series_number = GetSeriesNumber(handle);
-    str_data version_number = GetVersionNumber(handle);
+    UShortData ushort_data;
+    ShortData short_data;
+    LongData long_data;
+    DoubleData double_data;
+    LongMapData long_map_data;
+    DoubleMapData double_map_data;
+    StrData str_data;
+};
 
-    //pull device data
-    data.name = device.name;
-    data.address = device.address;
-    data.port = device.port;
-    data.series = device.series;
-    //pull mode data
-    aut.PullData(data.aut, data.errors[0]);
-    run.PullData(data.run, data.errors[1]);
-    edit.PullData(data.edit, data.errors[2]);
-    shutdowns.PullData(data.shutdowns, data.errors[3]);
-    g00.PullData(data.g00, data.errors[4]);
-    motion.PullData(data.motion, data.errors[5]);
-    mstb.PullData(data.mstb, data.errors[6]);
-    load_excess.PullData(data.load_excess, data.errors[7]);
-    //pull program data
-    frame.PullData(data.frame, data.errors[8]);
-    main_prog_number.PullData(data.main_prog_number, data.errors[9]);
-    sub_prog_number.PullData(data.sub_prog_number, data.errors[10]);
-    parts_count.PullData(data.parts_count, data.errors[11]);
-    tool_number.PullData(data.tool_number, data.errors[12]);
-    frame_number.PullData(data.frame_number, data.errors[13]);
-    //pull axes data
-    feedrate.PullData(data.feedrate, data.errors[14]);
-    feed_override.PullData(data.feed_override, data.errors[15]);
-    jog_override.PullData(data.jog_override, data.errors[16]);
-    jog_speed.PullData(data.jog_speed, data.errors[17]);
-    current_load.PullData(data.current_load, data.errors[18]);
-    current_load_percent.PullData(data.current_load_percent, data.errors[19]);
-    servo_loads.PullData(data.servo_loads, data.errors[20]);
-    absolute_positions.PullData(data.absolute_positions, data.errors[21]);
-    machine_positions.PullData(data.machine_positions, data.errors[22]);
-    relative_positions.PullData(data.relative_positions, data.errors[23]);
-    //pull spindle data
-    spindle_speed.PullData(data.spindle_speed, data.errors[24]);
-    spindle_param_speed.PullData(data.spindle_param_speed, data.errors[25]);
-    spindle_motor_speed.PullData(data.spindle_motor_speed, data.errors[26]);
-    spindle_load.PullData(data.spindle_load, data.errors[27]);
-    spindle_override.PullData(data.spindle_override, data.errors[28]);
-    //pull alarm data
-    emergency.PullData(data.emergency, data.errors[29]);
-    alarm.PullData(data.alarm, data.errors[30]);
-    //pull model data
-
-    axes_number.PullData(data.axes_number, data.errors[31]);
-    spindles_number.PullData(data.spindles_number, data.errors[32]);
-    channels_number.PullData(data.channels_number, data.errors[33]);
-    power_on_time.PullData(data.power_on_time, data.errors[34]);
-    operation_time.PullData(data.operation_time, data.errors[35]);
-    cutting_time.PullData(data.cutting_time, data.errors[36]);
-    cycle_time.PullData(data.cycle_time, data.errors[37]);
-    series_number.PullData(data.series_number, data.errors[38]);
-    version_number.PullData(data.version_number, data.errors[39]);
-
-    int equal_counter = 0;
-    short first_error = data.errors[0];
-    int max_errors = data.errors.size();
-    for (int i = 0; i < max_errors; i++)
-        if (data.errors[i] != 0)
-            if (first_error == data.errors[i])
-                equal_counter++;
-    if (equal_counter == max_errors)
-        return false;
-    else
-        return true;
-}
+struct WriteContext
+{
+    unsigned short& handle;
+    const Device& device;
+    rapidjson::Writer<rapidjson::StringBuffer>& writer;
+    MergedData& buf;
+    std::map<std::string, int>& errors;
+};
 
 bool ParseDevices(const char* json, std::vector<Device>& devices)
 {
@@ -131,7 +41,7 @@ bool ParseDevices(const char* json, std::vector<Device>& devices)
     if (!ok)
         return false;
 
-    for (const auto& device_value : doc.GetArray()) 
+    for (const auto& device_value : doc.GetArray())
     {
         Device device;
         if (device_value.HasMember("name") && device_value["name"].IsString())
@@ -142,6 +52,11 @@ bool ParseDevices(const char* json, std::vector<Device>& devices)
 
         if (device_value.HasMember("series") && device_value["series"].IsString())
             device.series = device_value["series"].GetString();
+
+        if (device_value.HasMember("tags_pack") && device_value["tags_pack"].IsArray())
+            for (const auto& v : device_value["tags_pack"].GetArray())
+                if (v.IsString())
+                    device.pack.push_back(v.GetString());
 
         if (device_value.HasMember("port") && device_value["port"].IsInt())
             device.port = device_value["port"].GetInt();
@@ -154,147 +69,369 @@ bool ParseDevices(const char* json, std::vector<Device>& devices)
     return true;
 }
 
-std::string SerializeFanucData(FanucData& data)
+static void WriteIntData(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key, const int& data)
+{
+    writer.Key(key.data());
+    writer.Int(data);
+}
+
+static void WriteInt64Data(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key, const long& data)
+{
+    writer.Key(key.data());
+    writer.Int64(data);
+}
+
+static void WriteDoubleData(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key, const double& data)
+{
+    writer.Key(key.data());
+    writer.Double(data);
+}
+
+static void WriteStringData(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key, std::string_view data)
+{
+    writer.Key(key.data());
+    writer.String(data.data());
+}
+
+static void WriteIntMapData(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key, const std::map<std::string, int>& data)
+{
+    writer.Key(key.data());
+    writer.StartObject();
+    for (const auto& pair : data)
+    {
+        writer.Key(pair.first.data());
+        writer.Int(pair.second);
+    }
+    writer.EndObject();
+}
+
+static void WriteInt64MapData(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key,const std::map<std::string, long>& data)
+{
+    writer.Key(key.data());
+    writer.StartObject();
+    for (const auto& pair : data)
+    {
+        writer.Key(pair.first.data());
+        writer.Int64(pair.second);
+    }
+    writer.EndObject();
+}
+
+static void WriteDoubleMapData(rapidjson::Writer<rapidjson::StringBuffer>& writer, std::string_view key,const std::map<std::string, double>& data)
+{
+    writer.Key(key.data());
+    writer.StartObject();
+    for (const auto& pair : data)
+    {
+        writer.Key(pair.first.data());
+        writer.Double(pair.second);
+    }
+    writer.EndObject();
+}
+
+std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = {
+    {"errors", [](WriteContext& ctx) {}},
+    {"name", [](WriteContext& ctx) 
+    {
+        WriteStringData(ctx.writer, "name", ctx.device.name);
+    }},
+    {"address", [](WriteContext& ctx) 
+    {
+        WriteStringData(ctx.writer, "address", ctx.device.address);
+    }},
+    {"port", [](WriteContext& ctx) 
+    {
+        WriteIntData(ctx.writer, "port", ctx.device.port);
+    }},
+    {"aut", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetMode(ctx.handle);
+        WriteIntData(ctx.writer, "aut", ctx.buf.short_data.data);
+        ctx.errors["aut"] = ctx.buf.short_data.error;
+    }},
+    {"run", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetRunState(ctx.handle);
+        WriteIntData(ctx.writer, "run", ctx.buf.short_data.data);
+        ctx.errors["run"] = ctx.buf.short_data.error;
+    }},
+    {"edit", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetStatus(ctx.handle);
+        WriteIntData(ctx.writer, "edit", ctx.buf.short_data.data);
+        ctx.errors["edit"] = ctx.buf.short_data.error;
+    }},
+    {"shutdowns", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetShutdowns(ctx.handle);
+        WriteIntData(ctx.writer, "shutdowns", ctx.buf.short_data.data);
+        ctx.errors["shutdowns"] = ctx.buf.short_data.error;
+    }},
+    {"g00", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetG00(ctx.handle);
+        WriteIntData(ctx.writer, "g00", ctx.buf.short_data.data);
+        ctx.errors["g00"] = ctx.buf.short_data.error;
+    }},
+    {"motion", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetAxisMotion(ctx.handle);
+        WriteIntData(ctx.writer, "motion", ctx.buf.short_data.data);
+        ctx.errors["motion"] = ctx.buf.short_data.error;
+    }},
+    {"mstb", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetMstb(ctx.handle);
+        WriteIntData(ctx.writer, "mstb", ctx.buf.short_data.data);
+        ctx.errors["mstb"] = ctx.buf.short_data.error;
+    }},
+    {"load_excess", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetLoadExcess(ctx.handle);
+        WriteIntData(ctx.writer, "load_excess", ctx.buf.short_data.data);
+        ctx.errors["load_excess"] = ctx.buf.short_data.error;
+    }},
+    {"frame", [](WriteContext& ctx) 
+    {
+        ctx.buf.str_data = GetFrame(ctx.handle);
+        WriteStringData(ctx.writer, "frame", ctx.buf.str_data.data);
+        ctx.errors["frame"] = ctx.buf.str_data.error;
+    }},
+    {"main_prog_number", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetMainPrgNumber(ctx.handle);
+        WriteIntData(ctx.writer, "main_prog_number", ctx.buf.short_data.data);
+        ctx.errors["main_prog_number"] = ctx.buf.short_data.error;
+    }},
+    {"sub_prog_number", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetSubPrgNumber(ctx.handle);
+        WriteIntData(ctx.writer, "sub_prog_number", ctx.buf.short_data.data);
+        ctx.errors["sub_prog_number"] = ctx.buf.short_data.error;
+    }},
+    {"parts_count", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_data = GetPartsCount(ctx.handle);
+        WriteInt64Data(ctx.writer, "parts_count", ctx.buf.long_data.data);
+        ctx.errors["parts_count"] = ctx.buf.long_data.error;
+    }},
+    {"tool_number", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_data = GetToolNumber(ctx.handle);
+        WriteInt64Data(ctx.writer, "tool_number", ctx.buf.long_data.data);
+        ctx.errors["tool_number"] = ctx.buf.long_data.error;
+    }},
+    {"frame_number", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_data = GetFrameNumber(ctx.handle);
+        WriteInt64Data(ctx.writer, "frame_number", ctx.buf.long_data.data);
+        ctx.errors["frame_number"] = ctx.buf.long_data.error;
+    }},
+    {"feedrate", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_data = GetFeedRate(ctx.handle);
+        WriteInt64Data(ctx.writer, "feedrate", ctx.buf.long_data.data);
+        ctx.errors["feedrate"] = ctx.buf.long_data.error;
+    }},
+    {"feed_override", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetFeedOverride(ctx.handle);
+        WriteIntData(ctx.writer, "feed_override", ctx.buf.short_data.data);
+        ctx.errors["feed_override"] = ctx.buf.short_data.error;
+    }},
+    {"jog_override", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetJogOverride(ctx.handle);
+        WriteIntData(ctx.writer, "jog_override", ctx.buf.short_data.data);
+        ctx.errors["jog_override"] = ctx.buf.short_data.error;
+    }},
+    {"jog_speed", [](WriteContext& ctx) 
+    {
+        ctx.buf.double_map_data = GetJogSpeed(ctx.handle);
+        WriteDoubleMapData(ctx.writer, "jog_speed", ctx.buf.double_map_data.data);
+        ctx.errors["jog_speed"] = ctx.buf.double_map_data.error;
+    }},
+    {"current_load", [](WriteContext& ctx) 
+    {
+        ctx.buf.double_map_data = GetServoCurrentLoad(ctx.handle);
+        WriteDoubleMapData(ctx.writer, "current_load", ctx.buf.double_map_data.data);
+        ctx.errors["current_load"] = ctx.buf.double_map_data.error;
+    }},
+    {"current_load_percent", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_map_data = GetServoCurrentPercentLoad(ctx.handle);
+        WriteInt64MapData(ctx.writer, "current_load_percent", ctx.buf.long_map_data.data);
+        ctx.errors["current_load_percent"] = ctx.buf.long_map_data.error;
+    }},
+    {"servo_loads", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_map_data = GetAllServoLoad(ctx.handle);
+        WriteInt64MapData(ctx.writer, "servo_loads", ctx.buf.long_map_data.data);
+        ctx.errors["servo_loads"] = ctx.buf.long_map_data.error;
+    }},
+    {"absolute_positions", [](WriteContext& ctx) 
+    {
+        ctx.buf.double_map_data = GetAbsolutePositions(ctx.handle);
+        WriteDoubleMapData(ctx.writer, "absolute_positions", ctx.buf.double_map_data.data);
+        ctx.errors["absolute_positions"] = ctx.buf.double_map_data.error;
+    }},
+    {"machine_positions", [](WriteContext& ctx) 
+    {
+        ctx.buf.double_map_data = GetMachinePositions(ctx.handle);
+        WriteDoubleMapData(ctx.writer, "machine_positions", ctx.buf.double_map_data.data);
+        ctx.errors["machine_positions"] = ctx.buf.double_map_data.error;
+    }},
+    {"relative_positions", [](WriteContext& ctx) 
+    {
+        ctx.buf.double_map_data = GetRelativePositions(ctx.handle);
+        WriteDoubleMapData(ctx.writer, "relative_positions", ctx.buf.double_map_data.data);
+        ctx.errors["relative_positions"] = ctx.buf.double_map_data.error;
+    }},
+    {"spindle_speed", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_data = GetSpindleSpeed(ctx.handle);
+        WriteInt64Data(ctx.writer, "spindle_speed", ctx.buf.long_data.data);
+        ctx.errors["spindle_speed"] = ctx.buf.long_data.error;
+    }},
+    {"spindle_param_speed", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_map_data = GetSpindleSpeedParam(ctx.handle);
+        WriteInt64MapData(ctx.writer, "spindle_param_speed", ctx.buf.long_map_data.data);
+        ctx.errors["spindle_param_speed"] = ctx.buf.long_map_data.error;
+    }},
+    {"spindle_override", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetSpindleOverride(ctx.handle);
+        WriteIntData(ctx.writer, "spindle_override", ctx.buf.short_data.data);
+        ctx.errors["spindle_override"] = ctx.buf.short_data.error;
+    }},
+    {"spindle_motor_speed", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_map_data = GetSpindleMotorSpeed(ctx.handle);
+        WriteInt64MapData(ctx.writer, "spindle_motor_speed", ctx.buf.long_map_data.data);
+        ctx.errors["spindle_motor_speed"] = ctx.buf.long_map_data.error;
+    }},
+    {"spindle_load", [](WriteContext& ctx) 
+    {
+        ctx.buf.long_map_data = GetSpindleLoad(ctx.handle);
+        WriteInt64MapData(ctx.writer, "spindle_load", ctx.buf.long_map_data.data);
+        ctx.errors["spindle_load"] = ctx.buf.long_map_data.error;
+    }},
+    {"emergency", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetEmergency(ctx.handle);
+        WriteIntData(ctx.writer, "emergency", ctx.buf.short_data.data);
+        ctx.errors["emergency"] = ctx.buf.short_data.error;
+    }},
+    {"alarm", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetAlarm(ctx.handle);
+        WriteIntData(ctx.writer, "alarm", ctx.buf.short_data.data);
+        ctx.errors["alarm"] = ctx.buf.short_data.error;
+    }},
+    {"axes_number", [](WriteContext& ctx) 
+    {
+        ctx.buf.short_data = GetCtrlAxesNumber(ctx.handle);
+        WriteIntData(ctx.writer, "axes_number", ctx.buf.short_data.data);
+        ctx.errors["axes_number"] = ctx.buf.short_data.error;
+    }},
+    {"spindles_number", [](WriteContext& ctx)
+    {
+        ctx.buf.short_data = GetCtrlSpindlesNumber(ctx.handle);
+        WriteIntData(ctx.writer, "spindles_number", ctx.buf.short_data.data);
+        ctx.errors["spindles_number"] = ctx.buf.short_data.error;
+    }},
+    {"channels_number", [](WriteContext& ctx)
+    {
+        ctx.buf.short_data = GetCtrlPathsNumber(ctx.handle);
+        WriteIntData(ctx.writer, "channels_number", ctx.buf.short_data.data);
+        ctx.errors["channels_number"] = ctx.buf.short_data.error;
+    }},
+    {"power_on_time", [](WriteContext& ctx)
+    {
+        ctx.buf.long_data = GetPowerOnTime(ctx.handle);
+        WriteInt64Data(ctx.writer, "power_on_time", ctx.buf.long_data.data);
+        ctx.errors["power_on_time"] = ctx.buf.long_data.error;
+    }},
+    {"operation_time", [](WriteContext& ctx)
+    {
+        ctx.buf.double_data = GetOperationTime(ctx.handle);
+        WriteDoubleData(ctx.writer, "operation_time", ctx.buf.double_data.data);
+        ctx.errors["operation_time"] = ctx.buf.double_data.error;
+    }},
+    {"cutting_time", [](WriteContext& ctx)
+    {
+        ctx.buf.double_data = GetCuttingTime(ctx.handle);
+        WriteDoubleData(ctx.writer, "cutting_time", ctx.buf.double_data.data);
+        ctx.errors["cutting_time"] = ctx.buf.double_data.error;
+    }},
+    {"cycle_time", [](WriteContext& ctx)
+    {
+        ctx.buf.double_data = GetCycleTime(ctx.handle);
+        WriteDoubleData(ctx.writer, "cycle_time", ctx.buf.double_data.data);
+        ctx.errors["cycle_time"] = ctx.buf.double_data.error;
+    }},
+    {"series_number", [](WriteContext& ctx)
+    {
+        ctx.buf.str_data = GetSeriesNumber(ctx.handle);
+        WriteStringData(ctx.writer, "series_number", ctx.buf.str_data.data);
+        ctx.errors["series_number"] = ctx.buf.str_data.error;
+    }},
+    {"version_number", [](WriteContext& ctx)
+    {
+        ctx.buf.str_data = GetVersionNumber(ctx.handle);
+        WriteStringData(ctx.writer, "version_number", ctx.buf.str_data.data);
+        ctx.errors["version_number"] = ctx.buf.str_data.error;
+    }},
+    {"cnc_id", [](WriteContext& ctx)
+    {
+        ctx.buf.str_data = GetCncId(ctx.handle);
+        WriteStringData(ctx.writer, "cnc_id", ctx.buf.str_data.data);
+        ctx.errors["cnc_id"] = ctx.buf.str_data.error;
+    }},
+    {"serial_number", [](WriteContext& ctx)
+    {
+        ctx.buf.long_data = GetSerialNumber(ctx.handle);
+        WriteInt64Data(ctx.writer, "serial_number", ctx.buf.long_data.data);
+        ctx.errors["serial_number"] = ctx.buf.long_data.error;
+    }}
+};
+
+void InitTagPacks(std::vector<Device>& devices)
+{
+    std::vector<std::string> available_tags;
+    for (const auto& [key, _] : fanuc_tags)
+        available_tags.push_back(std::string(key));
+
+    for (auto& device : devices)
+    {
+        if (device.pack.empty())
+            device.pack = available_tags;
+        else
+        {
+            std::vector<std::string> filtered;
+            for (auto& tag : device.pack)
+                if (std::find(available_tags.begin(), available_tags.end(), tag) != available_tags.end())
+                    filtered.push_back(tag);
+            device.pack = filtered;
+        }
+    }
+}
+
+void GetFanucDataJson(unsigned short& handle, const Device& device, std::string& json_data)
 {
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-    writer.StartObject();
+    MergedData buf{};
+    std::map<std::string, int> errors{};
+    WriteContext ctx{handle, device, writer, buf, errors};
 
-    //device data
-    writer.Key("name");    writer.String(data.name.c_str());
-    writer.Key("series");  writer.String(data.series.c_str());
-    writer.Key("address"); writer.String(data.address.c_str());
-    writer.Key("port");    writer.Int(data.port);
-    //mode data 
-    writer.Key("aut");         writer.Int(data.aut);
-    writer.Key("run");         writer.Int(data.run);
-    writer.Key("edit");        writer.Int(data.edit);
-    writer.Key("shutdowns");   writer.Int(data.shutdowns);
-    writer.Key("g00");    writer.Int(data.g00);
-    writer.Key("motion"); writer.Int(data.motion);
-    writer.Key("mstb");        writer.Int(data.mstb);
-    writer.Key("load_excess"); writer.Int(data.load_excess);
-    //program data
-    writer.Key("frame");            writer.String(data.frame.c_str());
-    writer.Key("main_prog_number"); writer.Int(data.main_prog_number);
-    writer.Key("sub_prog_number");  writer.Int(data.sub_prog_number);
-    writer.Key("parts_count");      writer.Int(data.parts_count);
-    writer.Key("tool_number");      writer.Int64(data.tool_number);
-    writer.Key("frame_number");     writer.Int64(data.frame_number);
-    //axes data
-    writer.Key("feedrate");             writer.Int64(data.feedrate);
-    writer.Key("feed_override");        writer.Int(data.feed_override);
-    writer.Key("jog_override");         writer.Int(data.jog_override);
-
-    writer.Key("current_load_percent");
     writer.StartObject();
-    for (const auto& pair : data.current_load_percent)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Int64(pair.second);
-    }
+    for (const auto& key : device.pack)
+        fanuc_tags[key](ctx);
+    if (std::find(device.pack.begin(), device.pack.end(), "errors") != device.pack.end())
+        WriteIntMapData(writer, "errors", errors);
     writer.EndObject();
 
-    writer.Key("current_load");
-    writer.StartObject();
-    for (const auto& pair : data.current_load)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Double(pair.second);
-    }
-    writer.EndObject();
-
-    writer.Key("jog_speed");
-    writer.StartObject();
-    for (const auto& pair : data.jog_speed)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Double(pair.second);
-    }
-    writer.EndObject();
-    writer.Key("servo_loads");
-    writer.StartObject();
-    for (const auto& pair : data.servo_loads)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Int(pair.second);
-    }
-    writer.EndObject();
-    writer.Key("absolute_positions");
-    writer.StartObject();
-    for (const auto& pair : data.absolute_positions)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Double(pair.second);
-    }
-    writer.EndObject();
-    writer.Key("machine_positions");
-    writer.StartObject();
-    for (const auto& pair : data.machine_positions)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Double(pair.second);
-    }
-    writer.EndObject();
-    writer.Key("relative_positions");
-    writer.StartObject();
-    for (const auto& pair : data.relative_positions)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Double(pair.second);
-    }
-    writer.EndObject();
-    //spindle data
-    writer.Key("spindle_speed");       writer.Int64(data.spindle_speed);
-    writer.Key("spindle_override");    writer.Int(data.spindle_override);
-
-    writer.Key("spindle_param_speed");
-    writer.StartObject();
-    for (const auto& pair : data.spindle_param_speed)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Int64(pair.second);
-    }
-    writer.EndObject();
-
-    writer.Key("spindle_motor_speed");
-    writer.StartObject();
-    for (const auto& pair : data.spindle_motor_speed)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Int(pair.second);
-    }
-    writer.EndObject();
-
-    writer.Key("spindle_load");
-    writer.StartObject();
-    for (const auto& pair : data.spindle_load)
-    {
-        writer.Key(pair.first.c_str());
-        writer.Int(pair.second);
-    }
-    writer.EndObject();
-    //alarm data
-    writer.Key("emergency");    writer.Int(data.emergency);
-    writer.Key("alarm"); writer.Int(data.alarm);
-    //other data
-    writer.Key("axes_number");      writer.Int(data.axes_number);
-    writer.Key("spindles_number");      writer.Int(data.spindles_number);
-    writer.Key("channels_number");      writer.Int(data.channels_number);
-
-    writer.Key("power_on_time");    writer.Int(data.power_on_time);
-    writer.Key("operation_time"); writer.Double(data.operation_time);
-    writer.Key("cutting_time");    writer.Double(data.cutting_time);
-    writer.Key("cycle_time"); writer.Double(data.cycle_time);
-    writer.Key("series_number"); writer.String(data.series_number.c_str());
-    writer.Key("version_number"); writer.String(data.version_number.c_str());
-    //errors data
-    writer.Key("errors");
-    writer.StartArray();
-    for (auto error : data.errors)
-        writer.Int(error);
-    writer.EndArray();
-
-    writer.EndObject();
-    return std::string(s.GetString());
+    json_data = std::string(s.GetString());
 }

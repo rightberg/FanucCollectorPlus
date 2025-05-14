@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-typedef struct void_func
+struct VoidFunc
 {
 	short error;
 
@@ -12,28 +12,9 @@ typedef struct void_func
 	{
 		return error != 0;
 	}
-} void_func;
+};
 
-typedef struct bool_data
-{
-	bool data;
-	short error;
-
-	bool IsError() const
-	{
-		return error != 0;
-	}
-
-	void PullData(bool& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} bool_data;
-
-typedef struct str_data
+struct StrData
 {
 	std::string data;
     short error;
@@ -42,36 +23,9 @@ typedef struct str_data
 	{
 		return error != 0;
 	}
+};
 
-	void PullData(std::string& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} str_data;
-
-typedef struct int_data
-{
-	int data;
-	short error;
-
-	bool IsError() const
-	{
-		return error != 0;
-	}
-
-	void PullData(int& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} int_data;
-
-typedef struct long_data
+struct LongData
 {
 	long data;
 	short error;
@@ -80,36 +34,9 @@ typedef struct long_data
 	{
 		return error != 0;
 	}
+};
 
-	void PullData(long& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} long_data;
-
-typedef struct float_data
-{
-	float data;
-	short error;
-
-	bool IsError() const
-	{
-		return error != 0;
-	}
-
-	void PullData(float& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} float_data;
-
-typedef struct double_data
+struct DoubleData
 {
 	double data;
 	short error;
@@ -119,16 +46,9 @@ typedef struct double_data
 		return error != 0;
 	}
 
-	void PullData(double& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} double_data;
+};
 
-typedef struct short_data
+struct ShortData
 {
 	short  data;
 	short error;
@@ -137,17 +57,9 @@ typedef struct short_data
 	{
 		return error != 0;
 	}
+};
 
-	void PullData(short& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} short_data;
-
-typedef struct ushort_data
+struct UShortData
 {
 	unsigned short  data;
 	short error;
@@ -156,36 +68,9 @@ typedef struct ushort_data
 	{
 		return error != 0;
 	}
+};
 
-	void PullData(unsigned short& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} ushort_data;
-
-typedef struct map_data
-{
-	std::map<std::string,int> data;
-	short error;
-
-	bool IsError() const
-	{
-		return error != 0;
-	}
-
-	void PullData(std::map<std::string, int>& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} map_data;
-
-typedef struct long_map_data
+struct LongMapData
 {
 	std::map<std::string, long> data;
 	short error;
@@ -194,17 +79,9 @@ typedef struct long_map_data
 	{
 		return error != 0;
 	}
+};
 
-	void PullData(std::map<std::string, long>& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} long_map_data;
-
-typedef struct double_map_data
+struct DoubleMapData
 {
 	std::map<std::string, double> data;
 	short error;
@@ -213,13 +90,5 @@ typedef struct double_map_data
 	{
 		return error != 0;
 	}
-
-	void PullData(std::map<std::string, double>& _data, short& _error) const
-	{
-		if (error != 0)
-			_error = error;
-		else
-			_data = data;
-	}
-} double_map_data;
+};
 #endif

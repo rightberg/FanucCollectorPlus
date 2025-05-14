@@ -3,71 +3,55 @@
 #define FANUC_H
 #include <string>
 #include "FanucTypes.h"
-
-//decode functions
-std::string GetCncErrorMessage(int error_code);
-std::string GetModeString(short mode, std::string series);
-std::string GetRunStateString(int state_num, std::string series);
-std::string GetStatusString(int status);
-std::string GetAxisMotionString(int motion, const std::string series);
-std::string GetMstbString(int mstb, const std::string series);
-std::string GetLoadExcessString(int mstb, const std::string series);
-std::string GetHightSpeedString(int index);
-std::string GetAlarmString(int alarm, const std::string series);
-std::string GetAlarmStatusString(int alarm, const std::string series);
-std::string GetEmergencyString(int emg, const std::string series);
-std::string GetUnitString(int unit);
-std::string GetShutdownsString(short index);
-int GetSpindleOverrideValue(short sp_ov);
-float GetJogOverrideValue(short jog);
-int GetFeedOverrideValue(short unit);
 //handle functions
-ushort_data GetHandle(std::string address, int port, int timeout);
-void_func FreeHandle(unsigned short handle);
+UShortData GetHandle(std::string& address, int& port, int& timeout);
+VoidFunc FreeHandle(unsigned short& handle);
 //mode functions
-short_data GetMode(unsigned short handle);
-short_data GetRunState(unsigned short handle);
-short_data GetStatus(unsigned short handle);
-short_data GetShutdowns(unsigned short handle);
-short_data GetG00(unsigned short handle);
-short_data GetAxisMotion(unsigned short handle);
-short_data GetMstb(unsigned short handle);
-short_data GetLoadExcess(unsigned short handle);
+ShortData GetMode(unsigned short& handle);
+ShortData GetRunState(unsigned short& handle);
+ShortData GetStatus(unsigned short& handle);
+ShortData GetShutdowns(unsigned short& handle);
+ShortData GetG00(unsigned short& handle);
+ShortData GetAxisMotion(unsigned short& handle);
+ShortData GetMstb(unsigned short& handle);
+ShortData GetLoadExcess(unsigned short& handle);
 //program data
-short_data GetMainPrgNumber(unsigned short handle);
-short_data GetSubPrgNumber(unsigned short handle);
-str_data GetFrame(unsigned short handle);
-int_data GetPartsCount(unsigned short handle);
-long_data GetToolNumber(unsigned short handle);
-long_data GetFrameNumber(unsigned short handle);
+ShortData GetMainPrgNumber(unsigned short& handle);
+ShortData GetSubPrgNumber(unsigned short& handle);
+StrData GetFrame(unsigned short& handle);
+LongData GetPartsCount(unsigned short& handle);
+LongData GetToolNumber(unsigned short& handle);
+LongData GetFrameNumber(unsigned short& handle);
 //axis data
-long_data GetFeedRate(unsigned short handle);
-short_data GetFeedOverride(unsigned short handle);
-short_data GetJogOverride(unsigned short handle);
-double_map_data GetJogSpeed(unsigned short handle);
-double_map_data GetServoCurrentLoad(unsigned short handle);
-long_map_data GetServoCurrentPercentLoad(unsigned short handle);
-map_data GetAllServoLoad(unsigned short handle);
-double_map_data GetAbsolutePositions(unsigned short handle);
-double_map_data GetMachinePositions(unsigned short handle);
-double_map_data GetRelativePositions(unsigned short handle);
+LongData GetFeedRate(unsigned short& handle);
+ShortData GetFeedOverride(unsigned short& handle);
+ShortData GetJogOverride(unsigned short& handle);
+DoubleMapData GetJogSpeed(unsigned short& handle);
+DoubleMapData GetServoCurrentLoad(unsigned short& handle);
+LongMapData GetServoCurrentPercentLoad(unsigned short& handle);
+LongMapData GetAllServoLoad(unsigned short& handle);
+DoubleMapData GetAbsolutePositions(unsigned short& handle);
+DoubleMapData GetMachinePositions(unsigned short& handle);
+DoubleMapData GetRelativePositions(unsigned short& handle);
 //spindle data
-long_data GetSpindleSpeed(unsigned short handle);
-map_data GetSpindleMotorSpeed(unsigned short handle);
-map_data GetSpindleLoad(unsigned short handle);
-short_data GetSpindleOverride(unsigned short handle);
-long_map_data GetSpindleSpeedParam(unsigned short handle);
+LongData GetSpindleSpeed(unsigned short& handle);
+LongMapData GetSpindleMotorSpeed(unsigned short& handle);
+LongMapData GetSpindleLoad(unsigned short& handle);
+ShortData GetSpindleOverride(unsigned short& handle);
+LongMapData GetSpindleSpeedParam(unsigned short& handle);
 //alarm data
-short_data GetEmergencyStop(unsigned short handle);
-short_data GetAlarmStatus(unsigned short handle);
+ShortData GetEmergency(unsigned short& handle);
+ShortData GetAlarm(unsigned short& handle);
 //other data
-short_data GetCtrlAxesNumber(unsigned short handle);
-short_data GetCtrlSpindlesNumber(unsigned short handle);
-short_data GetCtrlPathsNumber(unsigned short handle);
-long_data GetPowerOnTime(unsigned short handle);
-double_data GetOperationTime(unsigned short handle);
-double_data GetCuttingTime(unsigned short handle);
-double_data GetCycleTime(unsigned short handle);
-str_data GetSeriesNumber(unsigned short handle);
-str_data GetVersionNumber(unsigned short handle);
+ShortData GetCtrlAxesNumber(unsigned short& handle);
+ShortData GetCtrlSpindlesNumber(unsigned short& handle);
+ShortData GetCtrlPathsNumber(unsigned short& handle);
+LongData GetPowerOnTime(unsigned short& handle);
+DoubleData GetOperationTime(unsigned short& handle);
+DoubleData GetCuttingTime(unsigned short& handle);
+DoubleData GetCycleTime(unsigned short& handle);
+StrData GetSeriesNumber(unsigned short& handle);
+StrData GetVersionNumber(unsigned short& handle);
+LongData GetSerialNumber(unsigned short& handle);
+StrData GetCncId(unsigned short& handle);
 #endif

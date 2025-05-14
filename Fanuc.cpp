@@ -8,23 +8,24 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <format>
 #include "FanucTypes.h"
 #define _CRT_SECURE_NO_WARNINGS
 
 #pragma region Handle functions
 
-ushort_data GetHandle(std::string address, int port, int timeout)
+UShortData GetHandle(std::string& address, int& port, int& timeout)
 {
-    ushort_data res = {};
+    UShortData res = {};
     short ret = cnc_allclibhndl3(address.c_str(), port, timeout, &res.data);
     if (ret != EW_OK)
         res.error = ret;
     return res;
 }
 
-void_func FreeHandle(unsigned short handle)
+VoidFunc FreeHandle(unsigned short& handle)
 {
-    void_func res = {};
+    VoidFunc res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -40,9 +41,9 @@ void_func FreeHandle(unsigned short handle)
 
 #pragma region Mode data
 
-short_data GetMode(unsigned short handle)
+ShortData GetMode(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -57,13 +58,11 @@ short_data GetMode(unsigned short handle)
     return res;
 }
 
-short_data GetRunState(unsigned short handle)
+ShortData GetRunState(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
-    {
-       res.error = -8;
-    }
+        res.error = -8;
     else
     {
         ODBST buf;
@@ -76,9 +75,9 @@ short_data GetRunState(unsigned short handle)
     return res;
 }
 
-short_data GetStatus(unsigned short handle)
+ShortData GetStatus(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -93,9 +92,9 @@ short_data GetStatus(unsigned short handle)
     return res;
 }
 
-short_data GetShutdowns(unsigned short handle)
+ShortData GetShutdowns(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -119,14 +118,14 @@ short_data GetShutdowns(unsigned short handle)
     return res;
 }
 
-short_data GetG00(unsigned short handle)
+ShortData GetG00(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        ODBMDL buf = {};
+        ODBMDL buf;
         short ret = cnc_modal(handle, 0, 0, &buf);
         if (ret != EW_OK)
             res.error = ret;
@@ -141,9 +140,9 @@ short_data GetG00(unsigned short handle)
     return res;
 }
 
-short_data GetAxisMotion(unsigned short handle)
+ShortData GetAxisMotion(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -158,9 +157,9 @@ short_data GetAxisMotion(unsigned short handle)
     return res;
 }
 
-short_data GetMstb(unsigned short handle)
+ShortData GetMstb(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -175,10 +174,9 @@ short_data GetMstb(unsigned short handle)
     return res;
 }
 
-//test
-short_data GetLoadExcess(unsigned short handle)
+ShortData GetLoadExcess(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -231,9 +229,9 @@ short_data GetLoadExcess(unsigned short handle)
 
 #pragma region Program data
 
-short_data GetMainPrgNumber(unsigned short handle)
+ShortData GetMainPrgNumber(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -248,9 +246,9 @@ short_data GetMainPrgNumber(unsigned short handle)
     return res;
 }
 
-short_data GetSubPrgNumber(unsigned short handle)
+ShortData GetSubPrgNumber(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -265,9 +263,9 @@ short_data GetSubPrgNumber(unsigned short handle)
     return res;
 }
 
-long_data GetFrameNumber(unsigned short handle)
+LongData GetFrameNumber(unsigned short& handle)
 {
-    long_data res = {};
+    LongData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -282,9 +280,9 @@ long_data GetFrameNumber(unsigned short handle)
     return res;
 }
 
-str_data GetFrame(unsigned short handle)
+StrData GetFrame(unsigned short& handle)
 {
-    str_data res = {};
+    StrData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -297,7 +295,7 @@ str_data GetFrame(unsigned short handle)
             res.error = ret;
         else if (length != 0 && num >= 0 && length < sizeof(buf))
         {
-            long_data frame_num_data = GetFrameNumber(handle);
+            LongData frame_num_data = GetFrameNumber(handle);
             if (frame_num_data.IsError())
                 res.error = ret;
             else
@@ -330,25 +328,9 @@ str_data GetFrame(unsigned short handle)
     return res;
 }
 
-    //str_data res = {};
-    //if (handle == 0)
-    //res.error = -8;
-    //else
-    //{
-    //    unsigned short length = 256;
-    //    short blknum;
-    //    char buf[256];
-    //    short ret = cnc_rdexecprog(handle, &length, &blknum, buf);
-    //    if (ret != EW_OK)
-    //        res.error = ret;
-    //    else if (length != 0 && blknum >= 0 && blknum + length <= sizeof(buf))
-    //        res.data = std::string(buf, length);
-    //}
-    //return res;
-
-int_data GetPartsCount(unsigned short handle)
+LongData GetPartsCount(unsigned short& handle)
 {
-    int_data res = {};
+    LongData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -363,9 +345,9 @@ int_data GetPartsCount(unsigned short handle)
     return res;
 }
 
-long_data GetToolNumber(unsigned short handle)
+LongData GetToolNumber(unsigned short& handle)
 {
-    long_data res = {};
+    LongData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -383,9 +365,9 @@ long_data GetToolNumber(unsigned short handle)
 
 #pragma region Axis data
 
-double_map_data GetAbsolutePositions(unsigned short handle)
+DoubleMapData GetAbsolutePositions(unsigned short& handle)
 {
-    double_map_data res = {};
+    DoubleMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -409,9 +391,9 @@ double_map_data GetAbsolutePositions(unsigned short handle)
     return res;
 }
 
-double_map_data GetMachinePositions(unsigned short handle)
+DoubleMapData GetMachinePositions(unsigned short& handle)
 {
-    double_map_data res = {};
+    DoubleMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -435,9 +417,9 @@ double_map_data GetMachinePositions(unsigned short handle)
     return res;
 }
 
-double_map_data GetRelativePositions(unsigned short handle)
+DoubleMapData GetRelativePositions(unsigned short& handle)
 {
-    double_map_data res = {};
+    DoubleMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -461,9 +443,9 @@ double_map_data GetRelativePositions(unsigned short handle)
     return res;   
 }
 
-long_data GetFeedRate(unsigned short handle)
+LongData GetFeedRate(unsigned short& handle)
 {
-    long_data res = {};
+    LongData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -478,9 +460,9 @@ long_data GetFeedRate(unsigned short handle)
     return res;
 }
 
-short_data GetFeedOverride(unsigned short handle)
+ShortData GetFeedOverride(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -495,11 +477,9 @@ short_data GetFeedOverride(unsigned short handle)
     return res;
 }
 
-//short result = Focas1.cnc_rdparam(handle, 1401, 0, 8, jov);
-//bool jog_enabled = (jov.cdata & 0x01) != 0;
-short_data GetJogOverride(unsigned short handle)
+ShortData GetJogOverride(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -514,9 +494,9 @@ short_data GetJogOverride(unsigned short handle)
     return res;
 }
 
-double_map_data GetJogSpeed(unsigned short handle)
+DoubleMapData GetJogSpeed(unsigned short& handle)
 {
-    double_map_data res = {};
+    DoubleMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -547,9 +527,9 @@ double_map_data GetJogSpeed(unsigned short handle)
     return res;
 }
 
-map_data GetAllServoLoad(unsigned short handle)
+LongMapData GetAllServoLoad(unsigned short& handle)
 {
-    map_data res = {};
+    LongMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -572,9 +552,9 @@ map_data GetAllServoLoad(unsigned short handle)
     return res;
 }
 
-double_map_data GetServoCurrentLoad(unsigned short handle)
+DoubleMapData GetServoCurrentLoad(unsigned short& handle)
 {
-    double_map_data res = {};
+    DoubleMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -600,9 +580,9 @@ double_map_data GetServoCurrentLoad(unsigned short handle)
     return res;
 }
 
-long_map_data GetServoCurrentPercentLoad(unsigned short handle)
+LongMapData GetServoCurrentPercentLoad(unsigned short& handle)
 {
-    long_map_data res = {};
+    LongMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -623,14 +603,14 @@ long_map_data GetServoCurrentPercentLoad(unsigned short handle)
 
 #pragma region Spindle data
 
-long_data GetSpindleSpeed(unsigned short handle)
+LongData GetSpindleSpeed(unsigned short& handle)
 {
-    long_data res = {};
+    LongData res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        ODBSPEED buf = {};
+        ODBSPEED buf;
         short type = 1;
         short ret = cnc_rdspeed(handle, type, &buf);
         if (ret != EW_OK)
@@ -641,9 +621,9 @@ long_data GetSpindleSpeed(unsigned short handle)
     return res;
 }
 
-long_map_data GetSpindleSpeedParam(unsigned short handle)
+LongMapData GetSpindleSpeedParam(unsigned short& handle)
 {
-    long_map_data res = {};
+    LongMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -661,9 +641,9 @@ long_map_data GetSpindleSpeedParam(unsigned short handle)
     return res;
 }
 
-map_data GetSpindleMotorSpeed(unsigned short handle)
+LongMapData GetSpindleMotorSpeed(unsigned short& handle)
 {
-    map_data res = {};
+    LongMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -678,20 +658,19 @@ map_data GetSpindleMotorSpeed(unsigned short handle)
             std::string name;
             for (int i = 0; i < num; i++)
             {
+                name.clear();
                 name += buf[i].spspeed.name;
                 name += buf[i].spspeed.suff1;
-                int value = buf[i].spspeed.data;
-                res.data[name] = value;
+                res.data[name] = buf[i].spspeed.data;
             }
         }
     }
     return res;
 }
 
-//test
-map_data GetSpindleLoad(unsigned short handle)
+LongMapData GetSpindleLoad(unsigned short& handle)
 {
-    map_data res = {};
+    LongMapData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -703,13 +682,13 @@ map_data GetSpindleLoad(unsigned short handle)
             res.error = ret;
         else
         {
+            std::string name;
             for (int i = 0; i < num; i++)
             {
-                std::string name;
+                name.clear();
                 name += buf[i].spload.name;
                 name += buf[i].spload.suff1;
-                int value = buf[i].spload.data;
-                res.data[name] = value;
+                res.data[name] = buf[i].spload.data;
             }
         }
     }
@@ -717,14 +696,14 @@ map_data GetSpindleLoad(unsigned short handle)
 }
 
 // only 15i series
-short_data GetSpindleOverride(unsigned short handle)
+ShortData GetSpindleOverride(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        IODBSGNL buf = {};
+        IODBSGNL buf;
         short ret = cnc_rdopnlsgnl(handle, 0x40, &buf);
         if (ret != EW_OK)
             res.error = ret;
@@ -738,14 +717,14 @@ short_data GetSpindleOverride(unsigned short handle)
 
 #pragma region Alarm data
 
-short_data GetEmergencyStop(unsigned short handle)
+ShortData GetEmergency(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        ODBST buf = {};
+        ODBST buf;
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
             res.error = ret;
@@ -755,14 +734,14 @@ short_data GetEmergencyStop(unsigned short handle)
     return res;
 }
 
-short_data GetAlarmStatus(unsigned short handle)
+ShortData GetAlarm(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
     {
-        ODBST buf = {};
+        ODBST buf;
         short ret = cnc_statinfo(handle, &buf);
         if (ret != EW_OK)
             res.error = ret;
@@ -776,9 +755,9 @@ short_data GetAlarmStatus(unsigned short handle)
 
 #pragma region Operating data
 
-long_data GetPowerOnTime(unsigned short handle)
+LongData GetPowerOnTime(unsigned short& handle)
 {
-    long_data res = {};
+    LongData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -793,9 +772,9 @@ long_data GetPowerOnTime(unsigned short handle)
     return res;
 }
 
-double_data GetOperationTime(unsigned short handle)
+DoubleData GetOperationTime(unsigned short& handle)
 {
-    double_data res = {};
+    DoubleData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -811,15 +790,15 @@ double_data GetOperationTime(unsigned short handle)
             if (ret != EW_OK)
                 res.error = ret;
             else
-                res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
+                res.data = buf_2.u.rdata.prm_val * 60.0 + buf_1.u.rdata.prm_val / 1000.0;
         }
     }
     return res;
 }
 
-double_data GetCuttingTime(unsigned short handle)
+DoubleData GetCuttingTime(unsigned short& handle)
 {
-    double_data res = {};
+    DoubleData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -835,15 +814,16 @@ double_data GetCuttingTime(unsigned short handle)
             if (ret != EW_OK)
                 res.error = ret;
             else
-                res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
+                res.data = buf_2.u.rdata.prm_val * 60.0 + buf_1.u.rdata.prm_val / 1000.0;
+                //res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
 }
 
-double_data GetCycleTime(unsigned short handle)
+DoubleData GetCycleTime(unsigned short& handle)
 {
-    double_data res = {};
+    DoubleData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -859,15 +839,16 @@ double_data GetCycleTime(unsigned short handle)
             if (ret != EW_OK)
                 res.error = ret;
             else
-                res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
+                res.data = buf_2.u.rdata.prm_val * 60.0 + buf_1.u.rdata.prm_val / 1000.0;
+                //res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
 }
 
-str_data GetSeriesNumber(unsigned short handle)
+StrData GetSeriesNumber(unsigned short& handle)
 {
-    str_data res = {};
+    StrData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -882,9 +863,9 @@ str_data GetSeriesNumber(unsigned short handle)
     return res;
 }
 
-str_data GetVersionNumber(unsigned short handle)
+StrData GetVersionNumber(unsigned short& handle)
 {
-    str_data res = {};
+    StrData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -899,9 +880,9 @@ str_data GetVersionNumber(unsigned short handle)
     return res;
 }
 
-short_data GetCtrlAxesNumber(unsigned short handle)
+ShortData GetCtrlAxesNumber(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -916,9 +897,9 @@ short_data GetCtrlAxesNumber(unsigned short handle)
     return res;
 }
 
-short_data GetCtrlSpindlesNumber(unsigned short handle)
+ShortData GetCtrlSpindlesNumber(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -933,9 +914,9 @@ short_data GetCtrlSpindlesNumber(unsigned short handle)
     return res;
 }
 
-short_data GetCtrlPathsNumber(unsigned short handle)
+ShortData GetCtrlPathsNumber(unsigned short& handle)
 {
-    short_data res = {};
+    ShortData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -950,4 +931,37 @@ short_data GetCtrlPathsNumber(unsigned short handle)
     return res;
 }
 
+LongData GetSerialNumber(unsigned short& handle)
+{
+    LongData res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        IODBPSD buf;
+        short ret = cnc_rdparam(handle, 13151, -1, sizeof(buf), &buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = buf.u.rdata.prm_val;
+    }
+    return res;
+}
+
+StrData GetCncId(unsigned short& handle)
+{
+    StrData res = {};
+    if (handle == 0)
+        res.error = -8;
+    else
+    {
+        unsigned long  buf[4];
+        short ret = cnc_rdcncid(handle, buf);
+        if (ret != EW_OK)
+            res.error = ret;
+        else
+            res.data = std::format("{:X}-{:X}-{:X}-{:X}", buf[0], buf[1], buf[2], buf[3]);
+    }
+    return res;
+}
 #pragma endregion

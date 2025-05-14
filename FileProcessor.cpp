@@ -23,7 +23,7 @@ bool CreateCrashLog(const std::string& message)
 
         logfile << message;
         logfile.close();
-        std::cout << "log файл успешно создан" << std::endl;
+        std::cerr << "log файл успешно создан" << std::endl;
         return true;
     }
     catch (const std::exception& e) 

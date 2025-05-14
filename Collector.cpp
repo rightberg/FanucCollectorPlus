@@ -9,18 +9,19 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <chrono>
 #include "focas/fwlib32.h"
 #include "Fanuc.h"
 #include "Collector.h"
-#include "Support.h"
 #define _CRT_SECURE_NO_WARNINGS
 
 std::mutex cout_mutex;
 std::vector<Device> devices = {};
 std::vector<unsigned short> handles = {};
 int min_delay_ms = 50;
-int max_errors = 10;
+int max_errors = 1;
 int  handle_timeout = 10;
+int free_time = 10;
 
 void FreeAllHandles()
 {
@@ -29,35 +30,54 @@ void FreeAllHandles()
         FreeHandle(handles[i]);
 }
 
-void CollectDataThread(Device device, unsigned short& handle, std::atomic_bool& running_flag)
+static void CollectDataThread(Device device, unsigned short& handle, std::atomic_bool& running_flag)
 {
     int delay_ms = device.delay_ms;
     if (delay_ms < min_delay_ms)
         delay_ms = min_delay_ms;
-    handle = GetHandle(device.address, device.port, handle_timeout).data;
-    int errors_counter = 0;
+    UShortData _handle = {};
+    VoidFunc free_handle = {};
+    unsigned short stacked_handle = 0;
+    std::string json_data;
     while (running_flag)
     {
-        FanucData collector = {};
-        if (!SetFanucData(handle, device, collector))
+        if (stacked_handle != 0)
         {
-            errors_counter++;
-            if (errors_counter == max_errors)
+            std::cerr << "Попытка освободить handle: " << stacked_handle << std::endl;
+            free_handle = FreeHandle(stacked_handle);
+            if (!free_handle.IsError() || free_handle.error == EW_HANDLE)
             {
-                errors_counter = 0;
-                FreeHandle(handle);
-                handle = GetHandle(device.address, device.port, handle_timeout).data;
+                stacked_handle = 0;
+                std::cerr << "Освобождение handle: успешно" << std::endl;
             }
-        }
-        std::string serialized_data = SerializeFanucData(collector);
-        {  
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            std::cout << serialized_data << std::endl;
-        }
+            else
+                std::cerr << "Освобождения handle: ошибка" << std::endl;
 
+            std::this_thread::sleep_for(std::chrono::seconds(free_time));
+        }
+        else
+        {
+            _handle = GetHandle(device.address, device.port, handle_timeout);
+            if (!_handle.IsError())
+            {
+                handle = _handle.data;
+                GetFanucDataJson(handle, device, json_data);
+                {
+                    std::lock_guard<std::mutex> lock(cout_mutex);
+                    std::cout << json_data << std::endl;
+                }
+                free_handle = FreeHandle(handle);
+                if (free_handle.IsError() && stacked_handle == 0 && handle != 0)
+                {
+                    stacked_handle = handle;
+                    std::cerr << "Ошибка освобождения handle: " << handle << std::endl;
+                }
+            }
+            else
+                std::cerr << "Ошибка получения handle: " << _handle.error << std::endl;
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
     }
-    FreeHandle(handle);
 }
 
 int main(int argc, char* argv[])
@@ -67,65 +87,38 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        std::string message = std::string("Ожидается <json_string>\n");
-        std::cerr << message;
-        CreateCrashLog(message);
+        std::cerr << "Ожидается <json_string>" << std::endl;
         return 1;
     }
 
-    try
-    {
-        std::string json_string = argv[1];
-        if (!ParseDevices(json_string.c_str(), devices))
+    if (argc >= 2)
+        if (!ParseDevices(argv[1], devices))
         {
-            std::string message = std::string("Ошибка парсинга devices\n");
-            std::cerr << message;
-            CreateCrashLog(message);
+            std::cerr << "Ошибка парсинга devices" << std::endl;
             return 2;
         }
-    }
-    catch (const std::exception& e)
-    {
-        std::string message = std::string("Ошибка парсинга (аргумент)\n");
-        std::cerr << message;
-        CreateCrashLog(message);
-        return 3;
-    }
 
     if (argc >= 3) 
-    {
         if (!TryGetPID(argv[2]))
         {
-            std::string message = std::string("Некорректный PID: ") + argv[2] + "\n";
-            std::cerr << message;
-            CreateCrashLog(message);
+            std::cerr << "Некорректный PID: " << std::endl;
             return 3;
         }
-    }
 
     if (argc >= 4)
     {
-        std::string arg = argv[3];
-        int number = std::stoi(arg);
+        int number = std::stoi(argv[3]);
         if (number >= 1)
             handle_timeout = number;
     }
 
-    if (argc >= 5)
-    {
-        std::string arg = argv[4];
-        int number = std::stoi(arg);
-        if (number >= 1)
-            max_errors = number;
-    }
-
     if (!SetSignalHandler())
     {
-        std::string message = "Не удалось установить обработчик консольных событий\n";
-        std::cerr << message;
-        CreateCrashLog(message);
+        std::cerr << "Не удалось установить обработчик консольных событий: " << std::endl;
         return 4;
     }
+
+    InitTagPacks(devices);
 
     std::vector<std::thread> threads;
     int device_count = devices.size();

@@ -4,7 +4,6 @@
 #include <iostream>
 #include <thread>
 #include "Collector.h"
-#include "Support.h"
 
 std::atomic_bool running{ true };
 std::atomic_bool exit_flag{ false };
@@ -60,7 +59,7 @@ static void WaitForParentShutdown(DWORD parent_pid)
     DWORD wait_result = WaitForSingleObject(parent_handle, INFINITE);
     if (wait_result == WAIT_OBJECT_0)
     {
-        std::cout << "Обнаружено завершение родительского процесса. Завершаем collector.exe." << std::endl;
+        std::cerr << "Обнаружено завершение родительского процесса. Завершаем collector.exe." << std::endl;
         running = false;
     }
     else
