@@ -50,9 +50,6 @@ bool ParseDevices(const char* json, std::vector<Device>& devices)
         if (device_value.HasMember("address") && device_value["address"].IsString())
             device.address = device_value["address"].GetString();
 
-        if (device_value.HasMember("series") && device_value["series"].IsString())
-            device.series = device_value["series"].GetString();
-
         if (device_value.HasMember("tags_pack") && device_value["tags_pack"].IsArray())
             for (const auto& v : device_value["tags_pack"].GetArray())
                 if (v.IsString())
@@ -409,7 +406,7 @@ void InitTagPacks(std::vector<Device>& devices)
             device.pack = available_tags;
         else
         {
-            std::vector<std::string> filtered;
+            std::vector<std::string> filtered{"name", "address", "port"};
             for (auto& tag : device.pack)
                 if (std::find(available_tags.begin(), available_tags.end(), tag) != available_tags.end())
                     filtered.push_back(tag);

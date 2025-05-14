@@ -13,7 +13,6 @@ struct Device
 {
     std::string name;
     std::string address;
-    std::string series;
     std::vector<std::string> pack;
     int port;
     int delay_ms;
