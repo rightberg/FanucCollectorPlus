@@ -142,19 +142,19 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
     }},
     {"aut", [](WriteContext& ctx) 
     {
-        ctx.buf.short_data = GetMode(ctx.handle);
+        ctx.buf.short_data = GetAut(ctx.handle);
         WriteIntData(ctx.writer, "aut", ctx.buf.short_data.data);
         ctx.errors["aut"] = ctx.buf.short_data.error;
     }},
     {"run", [](WriteContext& ctx) 
     {
-        ctx.buf.short_data = GetRunState(ctx.handle);
+        ctx.buf.short_data = GetRun(ctx.handle);
         WriteIntData(ctx.writer, "run", ctx.buf.short_data.data);
         ctx.errors["run"] = ctx.buf.short_data.error;
     }},
     {"edit", [](WriteContext& ctx) 
     {
-        ctx.buf.short_data = GetStatus(ctx.handle);
+        ctx.buf.short_data = GetEdit(ctx.handle);
         WriteIntData(ctx.writer, "edit", ctx.buf.short_data.data);
         ctx.errors["edit"] = ctx.buf.short_data.error;
     }},
@@ -172,7 +172,7 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
     }},
     {"motion", [](WriteContext& ctx) 
     {
-        ctx.buf.short_data = GetAxisMotion(ctx.handle);
+        ctx.buf.short_data = GetMotion(ctx.handle);
         WriteIntData(ctx.writer, "motion", ctx.buf.short_data.data);
         ctx.errors["motion"] = ctx.buf.short_data.error;
     }},
@@ -286,9 +286,9 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
     }},
     {"spindle_speed", [](WriteContext& ctx) 
     {
-        ctx.buf.long_data = GetSpindleSpeed(ctx.handle);
-        WriteInt64Data(ctx.writer, "spindle_speed", ctx.buf.long_data.data);
-        ctx.errors["spindle_speed"] = ctx.buf.long_data.error;
+        ctx.buf.double_data = GetSpindleSpeed(ctx.handle);
+        WriteInt64Data(ctx.writer, "spindle_speed", ctx.buf.double_data.data);
+        ctx.errors["spindle_speed"] = ctx.buf.double_data.error;
     }},
     {"spindle_param_speed", [](WriteContext& ctx) 
     {
@@ -380,17 +380,17 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
         WriteStringData(ctx.writer, "version_number", ctx.buf.str_data.data);
         ctx.errors["version_number"] = ctx.buf.str_data.error;
     }},
+    { "serial_number", [](WriteContext& ctx)
+    {
+        ctx.buf.long_data = GetSerialNumber(ctx.handle);
+        WriteInt64Data(ctx.writer, "serial_number", ctx.buf.long_data.data);
+        ctx.errors["serial_number"] = ctx.buf.long_data.error;
+    }},
     {"cnc_id", [](WriteContext& ctx)
     {
         ctx.buf.str_data = GetCncId(ctx.handle);
         WriteStringData(ctx.writer, "cnc_id", ctx.buf.str_data.data);
         ctx.errors["cnc_id"] = ctx.buf.str_data.error;
-    }},
-    {"serial_number", [](WriteContext& ctx)
-    {
-        ctx.buf.long_data = GetSerialNumber(ctx.handle);
-        WriteInt64Data(ctx.writer, "serial_number", ctx.buf.long_data.data);
-        ctx.errors["serial_number"] = ctx.buf.long_data.error;
     }}
 };
 

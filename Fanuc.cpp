@@ -41,7 +41,7 @@ VoidFunc FreeHandle(unsigned short& handle)
 
 #pragma region Mode data
 
-ShortData GetMode(unsigned short& handle)
+ShortData GetAut(unsigned short& handle)
 {
     ShortData res = {};
     if (handle == 0)
@@ -58,7 +58,7 @@ ShortData GetMode(unsigned short& handle)
     return res;
 }
 
-ShortData GetRunState(unsigned short& handle)
+ShortData GetRun(unsigned short& handle)
 {
     ShortData res = {};
     if (handle == 0)
@@ -75,7 +75,7 @@ ShortData GetRunState(unsigned short& handle)
     return res;
 }
 
-ShortData GetStatus(unsigned short& handle)
+ShortData GetEdit(unsigned short& handle)
 {
     ShortData res = {};
     if (handle == 0)
@@ -140,7 +140,7 @@ ShortData GetG00(unsigned short& handle)
     return res;
 }
 
-ShortData GetAxisMotion(unsigned short& handle)
+ShortData GetMotion(unsigned short& handle)
 {
     ShortData res = {};
     if (handle == 0)
@@ -195,7 +195,6 @@ ShortData GetLoadExcess(unsigned short& handle)
                 dec = buf_1[i].svload.dec;
                 value = buf_1[i].svload.data * std::pow(10, -dec);
                 if (value > 100)
-
                     res.data = 1;
                 break;
             }
@@ -603,9 +602,9 @@ LongMapData GetServoCurrentPercentLoad(unsigned short& handle)
 
 #pragma region Spindle data
 
-LongData GetSpindleSpeed(unsigned short& handle)
+DoubleData GetSpindleSpeed(unsigned short& handle)
 {
-    LongData res = {};
+    DoubleData res = {};
     if (handle == 0)
         res.error = -8;
     else
@@ -616,7 +615,7 @@ LongData GetSpindleSpeed(unsigned short& handle)
         if (ret != EW_OK)
             res.error = ret;
         else
-            res.data = buf.acts.data;
+            res.data = buf.acts.data * std::pow(10, -buf.acts.dec);
     }
     return res;
 }
@@ -815,7 +814,6 @@ DoubleData GetCuttingTime(unsigned short& handle)
                 res.error = ret;
             else
                 res.data = buf_2.u.rdata.prm_val * 60.0 + buf_1.u.rdata.prm_val / 1000.0;
-                //res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
@@ -840,7 +838,6 @@ DoubleData GetCycleTime(unsigned short& handle)
                 res.error = ret;
             else
                 res.data = buf_2.u.rdata.prm_val * 60.0 + buf_1.u.rdata.prm_val / 1000.0;
-                //res.data = buf_2.u.rdata.prm_val + buf_1.u.rdata.prm_val / 60000.0;
         }
     }
     return res;
