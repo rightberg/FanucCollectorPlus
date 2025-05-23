@@ -142,7 +142,6 @@
   <ItemGroup>
     <ClInclude Include="Collector.h" />
     <ClInclude Include="Fanuc.h" />
-    <ClInclude Include="FanucTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

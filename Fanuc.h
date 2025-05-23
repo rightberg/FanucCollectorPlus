@@ -2,7 +2,55 @@
 #ifndef FANUC_H
 #define FANUC_H
 #include <string>
-#include "FanucTypes.h"
+#include <map>
+
+//data structures
+struct VoidFunc
+{
+	short error;
+};
+
+struct StrData
+{
+	std::string data;
+	short error;
+};
+
+struct LongData
+{
+	long data;
+	short error;
+};
+
+struct DoubleData
+{
+	double data;
+	short error;
+};
+
+struct ShortData
+{
+	short  data;
+	short error;
+};
+
+struct UShortData
+{
+	unsigned short  data;
+	short error;
+};
+
+struct LongMapData
+{
+	std::map<std::string, long> data;
+	short error;
+};
+
+struct DoubleMapData
+{
+	std::map<std::string, double> data;
+	short error;
+};
 //handle functions
 UShortData GetHandle(std::string& address, int& port, int& timeout);
 VoidFunc FreeHandle(unsigned short& handle);

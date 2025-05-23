@@ -1,7 +1,6 @@
 #pragma once
 #ifndef COLLECTOR_H
 #define COLLECTOR_H
-#include "FanucTypes.h"
 #include <string>
 #include <vector>
 #include <atomic>
@@ -14,8 +13,8 @@ struct Device
     std::string name;
     std::string address;
     std::vector<std::string> pack;
-    int port;
-    int delay_ms;
+    int port = 8193;
+    int delay_ms = 50;
 };
 
 //process data

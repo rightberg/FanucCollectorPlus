@@ -8,7 +8,6 @@
 #include <map>
 #include <functional>
 #include "Fanuc.h"
-#include "FanucTypes.h"
 #include "Collector.h"
 #include <stdio.h>
 #include <iostream>

@@ -18,7 +18,6 @@
 std::mutex cout_mutex;
 std::vector<Device> devices = {};
 std::vector<unsigned short> handles = {};
-int min_delay_ms = 50;
 int max_errors = 1;
 int  handle_timeout = 10;
 int free_time = 10;
@@ -33,8 +32,8 @@ void FreeAllHandles()
 static void CollectDataThread(Device device, unsigned short& handle, std::atomic_bool& running_flag)
 {
     int delay_ms = device.delay_ms;
-    if (delay_ms < min_delay_ms)
-        delay_ms = min_delay_ms;
+    if (delay_ms < 0)
+        delay_ms = 0;
     UShortData _handle = {};
     VoidFunc free_handle = {};
     unsigned short stacked_handle = 0;
@@ -45,7 +44,7 @@ static void CollectDataThread(Device device, unsigned short& handle, std::atomic
         {
             std::cerr << "Попытка освободить handle: " << stacked_handle << std::endl;
             free_handle = FreeHandle(stacked_handle);
-            if (!free_handle.IsError() || free_handle.error == EW_HANDLE)
+            if (free_handle.error == 0 || free_handle.error == EW_HANDLE)
             {
                 stacked_handle = 0;
                 std::cerr << "Освобождение handle: успешно" << std::endl;
@@ -58,7 +57,7 @@ static void CollectDataThread(Device device, unsigned short& handle, std::atomic
         else
         {
             _handle = GetHandle(device.address, device.port, handle_timeout);
-            if (!_handle.IsError())
+            if (_handle.error == 0)
             {
                 handle = _handle.data;
                 GetFanucDataJson(handle, device, json_data);
@@ -67,7 +66,7 @@ static void CollectDataThread(Device device, unsigned short& handle, std::atomic
                     std::cout << json_data << std::endl;
                 }
                 free_handle = FreeHandle(handle);
-                if (free_handle.IsError() && stacked_handle == 0 && handle != 0)
+                if (free_handle.error != 0 && stacked_handle == 0 && handle != 0)
                 {
                     stacked_handle = handle;
                     std::cerr << "Ошибка освобождения handle: " << handle << std::endl;

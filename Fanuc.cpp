@@ -9,7 +9,7 @@
 #include <cmath>
 #include <vector>
 #include <format>
-#include "FanucTypes.h"
+#include "Fanuc.h"
 #define _CRT_SECURE_NO_WARNINGS
 
 #pragma region Handle functions
@@ -295,7 +295,7 @@ StrData GetFrame(unsigned short& handle)
         else if (length != 0 && num >= 0 && length < sizeof(buf))
         {
             LongData frame_num_data = GetFrameNumber(handle);
-            if (frame_num_data.IsError())
+            if (frame_num_data.error != 0)
                 res.error = ret;
             else
             {

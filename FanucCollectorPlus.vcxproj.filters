@@ -38,9 +38,6 @@
     <ClInclude Include="Fanuc.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="FanucTypes.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="Collector.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
