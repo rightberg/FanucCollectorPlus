@@ -430,6 +430,24 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
     }}
 };
 
+static void InitTagPack(Device& device)
+{
+    std::vector<std::string> available_tags;
+    for (const auto& [key, _] : fanuc_tags)
+        available_tags.push_back(std::string(key));
+
+    if (device.pack.empty())
+        device.pack = available_tags;
+    else
+    {
+        std::vector<std::string> filtered{ "name", "address", "port"};
+        for (auto& tag : device.pack)
+            if (std::find(available_tags.begin(), available_tags.end(), tag) != available_tags.end())
+                filtered.push_back(tag);
+        device.pack = filtered;
+    }
+}
+
 void InitTagPacks(std::vector<Device>& devices)
 {
     std::vector<std::string> available_tags;
@@ -492,6 +510,7 @@ extern "C"
         std::map<std::string, int> errors{};
         Device device{};
         ParseDevice(json_device, device);
+        InitTagPack(device);
         WriteContext ctx{ handle, handle_error, device, writer, buf, errors };
 
         writer.StartObject();
