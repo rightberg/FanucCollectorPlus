@@ -18,9 +18,10 @@ struct Device
 };
 
 //process data
+bool ParseDevice(const char* json, Device& device);
 bool ParseDevices(const char* json, std::vector<Device>& devices);
 void FreeAllHandles();
-void GetFanucDataJson(unsigned short& handle, const Device& device, std::string& json_data);
+void GetFanucDataJson(unsigned short& handle, short& handle_error, const Device& device, std::string& json_data);
 void InitTagPacks(std::vector<Device>& devices);
 //file functions
 bool CreateCrashLog(const std::string& message);

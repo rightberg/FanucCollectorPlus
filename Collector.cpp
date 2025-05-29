@@ -37,20 +37,18 @@ static void CollectDataThread(Device device, unsigned short& handle, std::atomic
     UShortData _handle = {};
     VoidFunc free_handle = {};
     unsigned short stacked_handle = 0;
+    short power_on = 1;
     std::string json_data;
     while (running_flag)
     {
         if (stacked_handle != 0)
         {
-            std::cerr << "Попытка освободить handle: " << stacked_handle << std::endl;
             free_handle = FreeHandle(stacked_handle);
             if (free_handle.error == 0 || free_handle.error == EW_HANDLE)
             {
                 stacked_handle = 0;
-                std::cerr << "Освобождение handle: успешно" << std::endl;
+                std::cerr << "Освобождение дескриптора: успешно" << std::endl;
             }
-            else
-                std::cerr << "Освобождения handle: ошибка" << std::endl;
 
             std::this_thread::sleep_for(std::chrono::seconds(free_time));
         }
@@ -59,8 +57,9 @@ static void CollectDataThread(Device device, unsigned short& handle, std::atomic
             _handle = GetHandle(device.address, device.port, handle_timeout);
             if (_handle.error == 0)
             {
+                power_on = 1;
                 handle = _handle.data;
-                GetFanucDataJson(handle, device, json_data);
+                GetFanucDataJson(handle, _handle.error, device, json_data);
                 {
                     std::lock_guard<std::mutex> lock(cout_mutex);
                     std::cout << json_data << std::endl;
@@ -69,11 +68,27 @@ static void CollectDataThread(Device device, unsigned short& handle, std::atomic
                 if (free_handle.error != 0 && stacked_handle == 0 && handle != 0)
                 {
                     stacked_handle = handle;
-                    std::cerr << "Ошибка освобождения handle: " << handle << std::endl;
+                    std::cerr 
+                        << "Ошибка освобождения дескриптора, handle: " << handle 
+                        << ", error: " << free_handle.error  
+                        << std::endl;
+                }
+            }
+            else if (_handle.error == EW_SOCKET)
+            {
+                if (power_on == 1)
+                {
+                    std::cerr << "Отсутсвует питание устройства (EW_SOCKET: -16)" << std::endl;
+                    GetFanucDataJson(handle, _handle.error, device, json_data);
+                    {
+                        std::lock_guard<std::mutex> lock(cout_mutex);
+                        std::cout << json_data << std::endl;
+                    }
+                    power_on = 0;
                 }
             }
             else
-                std::cerr << "Ошибка получения handle: " << _handle.error << std::endl;
+                std::cerr << "Ошибка получения дескриптора, error: " << _handle.error << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
     }

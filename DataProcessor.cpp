@@ -11,6 +11,7 @@
 #include "Collector.h"
 #include <stdio.h>
 #include <iostream>
+#include "FanucExternal.h"
 
 struct MergedData 
 {
@@ -26,11 +27,40 @@ struct MergedData
 struct WriteContext
 {
     unsigned short& handle;
+    short& handle_error;
     const Device& device;
     rapidjson::Writer<rapidjson::StringBuffer>& writer;
     MergedData& buf;
     std::map<std::string, int>& errors;
 };
+
+bool ParseDevice(const char* json, Device& device)
+{
+    rapidjson::Document doc;
+    rapidjson::ParseResult ok = doc.Parse(json);
+
+    if (!ok)
+        return false;
+
+    if (doc.HasMember("name") && doc["name"].IsString())
+        device.name = doc["name"].GetString();
+
+    if (doc.HasMember("address") && doc["address"].IsString())
+        device.address = doc["address"].GetString();
+
+    if (doc.HasMember("tags_pack") && doc["tags_pack"].IsArray())
+        for (const auto& v : doc["tags_pack"].GetArray())
+            if (v.IsString())
+                device.pack.push_back(v.GetString());
+
+    if (doc.HasMember("port") && doc["port"].IsInt())
+        device.port = doc["port"].GetInt();
+
+    if (doc.HasMember("delay_ms") && doc["delay_ms"].IsInt())
+        device.delay_ms = doc["delay_ms"].GetInt();
+
+    return true;
+}
 
 bool ParseDevices(const char* json, std::vector<Device>& devices)
 {
@@ -138,6 +168,13 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
     {"port", [](WriteContext& ctx) 
     {
         WriteIntData(ctx.writer, "port", ctx.device.port);
+    }},
+    {"power_on", [](WriteContext& ctx)
+    {
+        if (ctx.handle_error == -16)
+            WriteIntData(ctx.writer, "power_on", 0);
+        else
+            WriteIntData(ctx.writer, "power_on", 1);
     }},
     {"aut", [](WriteContext& ctx) 
     {
@@ -286,7 +323,7 @@ std::map<std::string_view, std::function<void(WriteContext& ctx)>> fanuc_tags = 
     {"spindle_speed", [](WriteContext& ctx) 
     {
         ctx.buf.double_data = GetSpindleSpeed(ctx.handle);
-        WriteInt64Data(ctx.writer, "spindle_speed", ctx.buf.double_data.data);
+        WriteDoubleData(ctx.writer, "spindle_speed", ctx.buf.double_data.data);
         ctx.errors["spindle_speed"] = ctx.buf.double_data.error;
     }},
     {"spindle_param_speed", [](WriteContext& ctx) 
@@ -414,13 +451,13 @@ void InitTagPacks(std::vector<Device>& devices)
     }
 }
 
-void GetFanucDataJson(unsigned short& handle, const Device& device, std::string& json_data)
+void GetFanucDataJson(unsigned short& handle, short& handle_error, const Device& device, std::string& json_data)
 {
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     MergedData buf{};
     std::map<std::string, int> errors{};
-    WriteContext ctx{handle, device, writer, buf, errors};
+    WriteContext ctx{handle, handle_error, device, writer, buf, errors};
 
     writer.StartObject();
     for (const auto& key : device.pack)
@@ -430,4 +467,40 @@ void GetFanucDataJson(unsigned short& handle, const Device& device, std::string&
     writer.EndObject();
 
     json_data = std::string(s.GetString());
+}
+
+extern "C"
+{
+    __declspec(dllexport) UShortDataEx GetHandleExternal(const char* address, int port, int timeout)
+    {
+        std::string _address(address);
+        UShortData _handle = GetHandle(_address, port, timeout);
+        return UShortDataEx{_handle.data, _handle.error};
+    }
+
+    __declspec(dllexport) short FreeHandleExternal(unsigned short handle)
+    {
+        VoidFunc free_handle = FreeHandle(handle);
+        return free_handle.error;
+    }
+
+    __declspec(dllexport) char* GetFanucJsonDataExternal(const char* json_device, unsigned short handle, short handle_error)
+    {
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        MergedData buf{};
+        std::map<std::string, int> errors{};
+        Device device{};
+        ParseDevice(json_device, device);
+        WriteContext ctx{ handle, handle_error, device, writer, buf, errors };
+
+        writer.StartObject();
+        for (const auto& key : device.pack)
+            fanuc_tags[key](ctx);
+        if (std::find(device.pack.begin(), device.pack.end(), "errors") != device.pack.end())
+            WriteIntMapData(writer, "errors", errors);
+        writer.EndObject();
+
+        return _strdup(s.GetString());
+    }
 }
